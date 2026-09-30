@@ -559,11 +559,11 @@ export default function Lanyard({ className = '' }) {
     // Assets for Authentic Two-Sided Credential (Design 5: Executive Premium & Design 6: Minimal Professional)
     const frontBaseImg = new Image();
     frontBaseImg.crossOrigin = 'anonymous';
-    frontBaseImg.src = '/assets/images/id_card_front_clean.png';
+    frontBaseImg.src = `${import.meta.env.BASE_URL}assets/images/id_card_front_clean.png`;
 
     const backBaseImg = new Image();
     backBaseImg.crossOrigin = 'anonymous';
-    backBaseImg.src = '/assets/images/id_card_back_clean.png';
+    backBaseImg.src = `${import.meta.env.BASE_URL}assets/images/id_card_back_clean.png`;
 
 
     // FRONT SIDE — DESIGN 5: EXECUTIVE PREMIUM

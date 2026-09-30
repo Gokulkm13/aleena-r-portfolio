@@ -1,10 +1,12 @@
+const BASE = import.meta.env.BASE_URL;
+
 export const personalInfo = {
   name: "ALEENA R",
   role: "HR Intern",
   company: "S & O Maritime Services Private Limited",
   companyUrl: "https://www.sandomaritime.com/",
-  portrait: "/assets/images/aleena-portrait.jpg",
-  footerPortrait: "/assets/images/aleena-footer-blended.png",
+  portrait: `${BASE}assets/images/aleena-portrait.jpg`,
+  footerPortrait: `${BASE}assets/images/aleena-footer-blended.png`,
   email: "aleenaraju203@gmail.com",
   instagram: "https://www.instagram.com/aleena.rosu.raju?stkn=MWFlbHRnazVrZXJtcg==",
   linkedIn: "https://www.linkedin.com/in/aleena-r-244691280",
@@ -88,9 +90,9 @@ export const researchPublications = {
     date: "July 2026",
     paperId: "JAAFR2607586",
     coAuthor: "Feha Marzook",
-    pdfUrl: "/JAAFR2607586.pdf",
-    certificateImage: "/assets/certificates/jaafr-publication-certificate.png",
-    certificatePdf: "/assets/certificates/jaafr-publication-certificate.pdf"
+    pdfUrl: `${BASE}JAAFR2607586.pdf`,
+    certificateImage: `${BASE}assets/certificates/jaafr-publication-certificate.png`,
+    certificatePdf: `${BASE}assets/certificates/jaafr-publication-certificate.pdf`
   },
   bookChapter: {
     badge: "RESEARCH PUBLICATION 01 • BOOK CHAPTER",
@@ -130,8 +132,8 @@ export const certificates = [
     recipient: "Aleena R",
     date: "May 18, 2026",
     duration: "2 total hours",
-    previewImage: "/assets/certificates/udemy-rebt.png",
-    pdfUrl: "/assets/certificates/udemy-rebt.pdf",
+    previewImage: `${BASE}assets/certificates/udemy-rebt.png`,
+    pdfUrl: `${BASE}assets/certificates/udemy-rebt.pdf`,
     aspectRatio: "4 / 3"
   },
   {
@@ -142,8 +144,8 @@ export const certificates = [
     score: "86%",
     coursePeriod: "December 2024",
     issuedDate: "31/01/2025",
-    previewImage: "/assets/certificates/swayam-educational-psychology.png",
-    pdfUrl: "/assets/certificates/swayam-educational-psychology.pdf",
+    previewImage: `${BASE}assets/certificates/swayam-educational-psychology.png`,
+    pdfUrl: `${BASE}assets/certificates/swayam-educational-psychology.pdf`,
     aspectRatio: "1.41 / 1"
   },
   {
@@ -154,8 +156,8 @@ export const certificates = [
     paper: "EXPLORING THE ROLE OF PSYCHOLOGICAL CAPITAL IN SHAPING EMPLOYEES JOB SATISFACTION: A PHENOMENOLOGICAL STUDY",
     publicationInfo: "Volume 4 Issue 7, July 2026",
     paperId: "JAAFR2607586",
-    previewImage: "/assets/certificates/jaafr-publication-certificate.png",
-    pdfUrl: "/assets/certificates/jaafr-publication-certificate.pdf",
+    previewImage: `${BASE}assets/certificates/jaafr-publication-certificate.png`,
+    pdfUrl: `${BASE}assets/certificates/jaafr-publication-certificate.pdf`,
     aspectRatio: "0.77 / 1"
   },
   {
@@ -163,8 +165,8 @@ export const certificates = [
     title: "APA Membership Certificate",
     provider: "American Psychological Association (APA)",
     recipient: "Aleena R",
-    previewImage: "/assets/certificates/apa-membership.png",
-    pdfUrl: "/assets/certificates/apa-membership.pdf",
+    previewImage: `${BASE}assets/certificates/apa-membership.png`,
+    pdfUrl: `${BASE}assets/certificates/apa-membership.pdf`,
     aspectRatio: "0.77 / 1"
   }
 ];
