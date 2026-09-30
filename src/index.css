@@ -1,0 +1,661 @@
+/* ==========================================================================
+   Aleena R. — Maritime & HR Editorial Portfolio
+   Dual-Theme System: Light Mode & Dark Mode
+   ========================================================================== */
+
+:root {
+  /* DARK MODE (Default) - Deep Ocean Navy & Gold/Orange */
+  --bg-primary: #06121F;
+  --bg-secondary: #0B1E33;
+  --bg-surface: #102A43;
+  --bg-card: rgba(15, 23, 36, 0.85);
+  --bg-card-hover: rgba(16, 42, 67, 0.95);
+  --bg-glass: rgba(11, 29, 47, 0.75);
+  --bg-nav: rgba(6, 18, 31, 0.85);
+  --bg-nav-scrolled: rgba(6, 18, 31, 0.96);
+
+  --primary-navy: #0D2B4D;
+  --deep-navy: #06121F;
+  --card-dark: #0F1724;
+
+  --text-primary: #F5F7FA;
+  --text-secondary: #A7B8C7;
+  --text-muted: #7A8FA4;
+  --text-inverse: #06121F;
+
+  --accent-gold: #F28C18;
+  --accent-gold-light: #FF9E33;
+  --accent-gold-dim: rgba(242, 140, 24, 0.12);
+  --accent-gold-glow: rgba(242, 140, 24, 0.28);
+  --accent-blue-soft: #1F4E73;
+  --accent-blue-soft-dim: rgba(31, 78, 115, 0.25);
+  --role-color: #F28C18;
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-card: rgba(255, 255, 255, 0.10);
+  --border-gold: rgba(242, 140, 24, 0.35);
+
+  --shadow-card: 0 16px 36px -10px rgba(0, 0, 0, 0.55);
+  --shadow-card-hover: 0 24px 48px -12px rgba(0, 0, 0, 0.7), 0 0 25px -8px rgba(242, 140, 24, 0.25);
+
+  /* Hero Visual Elements */
+  --hero-glow: radial-gradient(circle at 70% 45%, rgba(31, 78, 115, 0.45) 0%, rgba(242, 140, 24, 0.12) 45%, transparent 75%);
+  --hero-orbit-1: rgba(242, 140, 24, 0.40);
+  --hero-orbit-2: rgba(31, 78, 115, 0.55);
+  --hero-dot-grid: rgba(167, 184, 199, 0.22);
+  --wave-1: #0B2138;
+  --wave-2: #0D2B4D;
+  --wave-3: #123B5C;
+  --wave-4: #1F4E73;
+  --wave-accent: #F28C18;
+  --ship-opacity: 0.20;
+
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-editorial: 'Syne', sans-serif;
+  --font-accent: 'Cinzel', serif;
+
+  --max-width: 1440px;
+  --header-height: 80px;
+  --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --theme-transition: background-color 500ms ease-in-out,
+                      color 500ms ease-in-out,
+                      border-color 500ms ease-in-out,
+                      box-shadow 500ms ease-in-out;
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  /* LIGHT MODE - Warm Ivory + Navy + Gold + Soft Maritime Blue */
+  --bg-primary: #F7F5F0;
+  --bg-secondary: #EFECE4;
+  --bg-surface: #FFFFFF;
+  --bg-card: rgba(255, 255, 255, 0.94);
+  --bg-card-hover: #FFFFFF;
+  --bg-glass: rgba(247, 245, 240, 0.88);
+  --bg-nav: rgba(247, 245, 240, 0.88);
+  --bg-nav-scrolled: rgba(247, 245, 240, 0.96);
+
+  --primary-navy: #082B4C;
+  --deep-navy: #041C33;
+  --card-dark: #041C33;
+
+  --text-primary: #082B4C;
+  --text-secondary: #40566B;
+  --text-muted: #617386;
+  --text-inverse: #FFFFFF;
+
+  --accent-gold: #E9A24A;
+  --accent-gold-light: #F4BA6E;
+  --accent-gold-dim: rgba(233, 162, 74, 0.14);
+  --accent-gold-glow: rgba(233, 162, 74, 0.25);
+  --accent-blue-soft: #AFC7D8;
+  --accent-blue-soft-dim: rgba(175, 199, 216, 0.30);
+  --role-color: #B9782E;
+
+  --border-subtle: rgba(8, 43, 76, 0.08);
+  --border-card: rgba(8, 43, 76, 0.10);
+  --border-gold: rgba(233, 162, 74, 0.40);
+
+  --shadow-card: 0 12px 32px -8px rgba(8, 43, 76, 0.08);
+  --shadow-card-hover: 0 20px 40px -10px rgba(8, 43, 76, 0.14), 0 0 24px -6px rgba(233, 162, 74, 0.25);
+
+  /* Hero Graphics */
+  --hero-glow: radial-gradient(circle at 70% 45%, rgba(175, 199, 216, 0.45) 0%, rgba(233, 162, 74, 0.15) 45%, transparent 75%);
+  --hero-orbit-1: rgba(233, 162, 74, 0.45);
+  --hero-orbit-2: rgba(175, 199, 216, 0.65);
+  --hero-dot-grid: rgba(8, 43, 76, 0.16);
+  --wave-1: #E4ECF2;
+  --wave-2: #DCE8EF;
+  --wave-3: #AFC7D8;
+  --wave-4: #8FAFC3;
+  --wave-accent: #E9A24A;
+  --ship-opacity: 0.14;
+
+  color-scheme: light;
+}
+
+/* Global Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  max-width: 100vw;
+  width: 100%;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  position: relative;
+  transition: var(--theme-transition);
+}
+
+#root {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+}
+
+/* Global Transition for All Themed Surfaces & Typography */
+body,
+.nav-header,
+.glass-card,
+.section,
+.btn-primary,
+.btn-secondary,
+.btn-gold-pill,
+.btn-outline-pill,
+.section-tag,
+.section-title,
+.hero-statement,
+.pillar-card,
+.exp-card,
+.footer-container,
+.editorial-footer {
+  transition: var(--theme-transition);
+}
+
+/* Strictly Lock Lanyard from any theme transition */
+.lanyard-wrapper,
+.lanyard-canvas {
+  transition: none !important;
+}
+
+::selection {
+  background: var(--accent-gold);
+  color: var(--text-inverse);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.25s var(--transition-smooth), opacity 0.25s var(--transition-smooth);
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-surface);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-gold);
+}
+
+/* Container Utility */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 56px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 20px;
+  }
+}
+
+/* Section Common Styling */
+.section {
+  padding: 5.5rem 0;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 7rem 0;
+  }
+}
+
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent-gold);
+  margin-bottom: 0.85rem;
+  font-weight: 700;
+  padding-left: 0;
+}
+
+.section-tag::after {
+  content: "";
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5px;
+  background: var(--accent-gold);
+}
+
+.section-title {
+  font-family: var(--font-editorial);
+  font-size: clamp(1.5rem, 4.5vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin-bottom: 2.25rem;
+  text-transform: uppercase;
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: clamp(1.28rem, 5.8vw, 1.65rem);
+    line-height: 1.22;
+    margin-bottom: 1.75rem;
+  }
+}
+
+.section-title-subtle {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Editorial Glass Card */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-card);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-card), transparent);
+  pointer-events: none;
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-gold);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Primary Button */
+.btn-primary,
+.btn-gold-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.88rem 1.85rem;
+  background: var(--accent-gold);
+  color: var(--text-inverse);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 9999px;
+  box-shadow: 0 8px 24px -4px var(--accent-gold-glow);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-primary:hover,
+.btn-gold-pill:hover {
+  background: var(--accent-gold-light);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -4px var(--accent-gold-glow);
+}
+
+.btn-primary svg,
+.btn-gold-pill svg {
+  transition: transform 0.25s ease;
+}
+
+.btn-primary:hover svg,
+.btn-gold-pill:hover svg {
+  transform: translateX(4px);
+}
+
+/* Secondary Button */
+.btn-secondary,
+.btn-outline-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.84rem 1.85rem;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  border: 1.5px solid var(--text-primary);
+  border-radius: 9999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.25s var(--transition-smooth),
+              background 0.25s var(--transition-smooth),
+              color 0.25s var(--transition-smooth),
+              border-color 500ms ease-in-out;
+}
+
+[data-theme="light"] .btn-secondary,
+[data-theme="light"] .btn-outline-pill {
+  border-color: #082B4C;
+  color: #082B4C;
+}
+
+[data-theme="light"] .btn-secondary:hover,
+[data-theme="light"] .btn-outline-pill:hover {
+  background: #082B4C;
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(8, 43, 76, 0.25);
+}
+
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .btn-outline-pill {
+  border-color: rgba(245, 247, 250, 0.35);
+  color: #F5F7FA;
+}
+
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .btn-outline-pill:hover {
+  background: #F5F7FA;
+  color: #06121F;
+  border-color: #F5F7FA;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(255, 255, 255, 0.2);
+}
+
+/* Badge styling */
+.badge-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  background: var(--accent-gold-dim);
+  border: 1px solid var(--border-gold);
+  border-radius: 20px;
+  color: var(--accent-gold);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* Accessibility: Focus visible */
+:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Smooth Scroll Reveal Animation for Headings & Subheadings
+   ========================================================================== */
+.reveal-heading {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-heading.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger delay utility classes */
+.reveal-delay-1 { transition-delay: 80ms; }
+.reveal-delay-2 { transition-delay: 160ms; }
+.reveal-delay-3 { transition-delay: 240ms; }
+.reveal-delay-4 { transition-delay: 320ms; }
+.reveal-delay-5 { transition-delay: 400ms; }
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal-heading {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   Shared Certificate & Publication Interactive Card System
+   Single Source of Truth across Certifications & Accreditations and Research & Publications
+   ========================================================================== */
+.cert-interactive-card,
+.cert-gallery-card,
+.featured-research-card {
+  position: relative;
+  transition: transform 0.35s var(--transition-smooth), 
+              border-color 0.35s var(--transition-smooth),
+              box-shadow 0.35s var(--transition-smooth),
+              background-color 0.35s var(--transition-smooth);
+}
+
+/* Light Theme: Card Surface & Border */
+[data-theme="light"] .cert-interactive-card,
+[data-theme="light"] .cert-gallery-card,
+[data-theme="light"] .featured-research-card {
+  background: #FFFFFF;
+  border-color: var(--border-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* Dark Theme: Card Surface & Border */
+[data-theme="dark"] .cert-interactive-card,
+[data-theme="dark"] .cert-gallery-card {
+  background: rgba(16, 18, 24, 0.7);
+  border-color: var(--border-subtle);
+}
+[data-theme="dark"] .featured-research-card {
+  background: linear-gradient(135deg, rgba(20, 22, 28, 0.85) 0%, rgba(13, 15, 19, 0.9) 100%);
+  border-color: var(--border-gold);
+}
+
+/* Card Hover Elevation & Subtle Scale on Desktop */
+@media (min-width: 1024px) {
+  .cert-interactive-card:hover,
+  .cert-gallery-card:hover,
+  .featured-research-card:hover,
+  .cert-interactive-card:focus-visible,
+  .cert-gallery-card:focus-visible,
+  .featured-research-card:focus-within {
+    transform: translateY(-6px) scale(1.015);
+    border-color: var(--border-gold);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 30px -5px var(--accent-gold-glow);
+  }
+
+  [data-theme="light"] .cert-interactive-card:hover,
+  [data-theme="light"] .cert-gallery-card:hover,
+  [data-theme="light"] .featured-research-card:hover,
+  [data-theme="light"] .cert-interactive-card:focus-visible,
+  [data-theme="light"] .cert-gallery-card:focus-visible,
+  [data-theme="light"] .featured-research-card:focus-within {
+    background: #FFFFFF;
+    border-color: var(--border-gold);
+    box-shadow: var(--shadow-card-hover);
+  }
+}
+
+/* Card Image Container */
+.cert-img-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+[data-theme="light"] .cert-img-container {
+  background: #FFFFFF;
+}
+
+/* Image Scale Transition */
+.cert-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.4s var(--transition-smooth);
+}
+
+@media (min-width: 1024px) {
+  .cert-gallery-card:hover .cert-card-img,
+  .featured-research-card:hover .cert-card-img,
+  .cert-interactive-card:hover .cert-card-img,
+  .cert-img-container:hover .cert-card-img {
+    transform: scale(1.03);
+  }
+}
+
+/* Translucent Hover Overlay: STRICTLY appears ONLY when hovering the action button */
+.cert-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 9, 12, 0.70);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0 !important;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.3s ease, background-color 0.3s ease;
+  border-radius: 8px;
+}
+
+/* Light Theme Hover Overlay: Soft frosted white overlay (rgba(255, 255, 255, 0.50)) */
+[data-theme="light"] .cert-hover-overlay {
+  background: rgba(255, 255, 255, 0.50);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* Card hover strictly keeps overlay hidden (never dims certificate/publication on card hover) */
+.cert-gallery-card:hover .cert-hover-overlay,
+.featured-research-card:hover .cert-hover-overlay,
+.cert-interactive-card:hover .cert-hover-overlay {
+  opacity: 0 !important;
+}
+
+/* Overlay ONLY triggered when hovering the button (via :has selector and active state) */
+.cert-img-container:has(.cert-hover-btn:hover) .cert-hover-overlay,
+.cert-hover-overlay.is-active {
+  opacity: 1 !important;
+}
+
+/* View Action Button Container */
+.cert-hover-action {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cert-hover-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--accent-gold);
+  color: var(--text-inverse);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0.65rem 1.15rem;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transform: translateY(6px);
+  opacity: 0;
+  pointer-events: auto;
+  transition: transform 0.25s ease, opacity 0.25s ease, box-shadow 0.25s ease, background-color 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* On desktop card hover or image container hover, subtly reveal button while leaving the image 100% clear */
+  .cert-gallery-card:hover .cert-hover-btn,
+  .cert-gallery-card:focus-visible .cert-hover-btn,
+  .featured-research-card:hover .cert-hover-btn,
+  .featured-research-card:focus-within .cert-hover-btn,
+  .cert-interactive-card:hover .cert-hover-btn,
+  .cert-img-container:hover .cert-hover-btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .cert-hover-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+  }
+}
+
+
