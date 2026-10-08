@@ -115,7 +115,7 @@ export default function Experience() {
 
       <style>{`
         .experience-section {
-          background-color: var(--bg-primary);
+          background-color: transparent;
         }
         
         /* Current Role Spotlight */
@@ -123,8 +123,8 @@ export default function Experience() {
           padding: 2.75rem;
           border: 1px solid var(--border-gold);
           background: var(--bg-card);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           box-shadow: var(--shadow-card);
           margin-bottom: 3.5rem;
         }

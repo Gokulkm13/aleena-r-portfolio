@@ -102,7 +102,7 @@ export default function Education() {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          background: rgba(197, 168, 128, 0.1);
+          background: var(--accent-gold-dim);
           border: 1px solid var(--border-gold);
           border-radius: 20px;
           padding: 0.35rem 0.85rem;

@@ -8,10 +8,7 @@ export const personalInfo = {
   portrait: `${BASE}assets/images/aleena-portrait.jpg`,
   footerPortrait: `${BASE}assets/images/aleena-footer-blended.png`,
   email: "aleenaraju203@gmail.com",
-  instagram: "https://www.instagram.com/aleena.rosu.raju?stkn=MWFlbHRnazVrZXJtcg==",
   linkedIn: "https://www.linkedin.com/in/aleena-r-244691280",
-  telegram: "https://t.me/Aleenaraju",
-  telegramHandle: "@Aleenaraju",
   bioHeadline: "I bridge human psychology, workplace dynamics, and organizational excellence.",
   aboutIntro: "I am a Psychology postgraduate with a strong interest in understanding people, workplace behaviour, and the factors that contribute to healthy and productive organizational environments.",
   about: [

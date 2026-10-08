@@ -267,8 +267,8 @@ export default function Community() {
             position: relative;
             border-radius: 12px;
             background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border-subtle);
             user-select: none;
             -webkit-user-select: none;
@@ -331,7 +331,7 @@ export default function Community() {
             flex-shrink: 0;
           }
           .community-nav-btn:hover:not(:disabled) {
-            background: rgba(197, 168, 128, 0.15);
+            background: var(--accent-gold-dim);
             border-color: var(--border-gold);
             color: var(--accent-gold);
           }

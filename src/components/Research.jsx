@@ -176,7 +176,7 @@ export default function Research({ onSelectCertificate }) {
 
       <style>{`
         .research-section {
-          background-color: var(--bg-primary);
+          background-color: transparent;
           border-top: 1px solid var(--border-subtle);
           width: 100%;
           max-width: 100%;

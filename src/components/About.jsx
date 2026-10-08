@@ -184,7 +184,7 @@ export default function About() {
 
       <style>{`
         .about-section {
-          background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+          background: transparent;
           border-top: 1px solid var(--border-subtle);
         }
         .about-grid {

@@ -164,8 +164,8 @@ export default function CertificateModal({ certificate, onClose }) {
           inset: 0;
           z-index: 2000;
           background: rgba(4, 5, 7, 0.88);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -178,8 +178,8 @@ export default function CertificateModal({ certificate, onClose }) {
         }
         .cert-modal-container {
           background: var(--bg-card);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           border: 1px solid var(--border-gold);
           border-radius: 14px;
           width: 100%;

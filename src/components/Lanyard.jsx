@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+import { useTheme } from '../context/ThemeContext';
 
 /**
  * Interactive Real 3D Physical Lanyard Badge Component
@@ -13,6 +14,15 @@ export default function Lanyard({ className = '' }) {
   const [isDragging, setIsDragging] = useState(false);
   const attachListenerRef = useRef(null);
 
+  const { theme } = useTheme();
+  const themeUpdateHandlerRef = useRef(null);
+
+  useEffect(() => {
+    if (themeUpdateHandlerRef.current) {
+      themeUpdateHandlerRef.current(theme);
+    }
+  }, [theme]);
+
   useEffect(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
@@ -24,20 +34,20 @@ export default function Lanyard({ className = '' }) {
 
     // 1. Scene, Camera, High-Precision Renderer
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
 
     // Responsive Viewport & Centering Configuration
     let baseRestX = 0.12;
-    let baseRestY = -0.36;
+    let baseRestY = -0.20;
     let baseRestZ = 0;
     let targetRestAngleZ = -0.08;
     let targetRestAngleY = 0.08;
 
-    const strapTopLeft = new THREE.Vector3(-0.65, 2.75, -0.15);
-    const strapTopRight = new THREE.Vector3(0.65, 2.75, -0.05);
+    const strapTopLeft = new THREE.Vector3(-0.65, 2.90, -0.15);
+    const strapTopRight = new THREE.Vector3(0.65, 2.90, -0.05);
 
     function updateResponsiveConfig(w) {
-      const isMobile = w < 768;
+      const isMobile = (typeof window !== 'undefined' ? window.innerWidth : w) < 768;
       if (isMobile) {
         camera.fov = 42;
         camera.position.set(0, 0.35, 5.8);
@@ -48,14 +58,14 @@ export default function Lanyard({ className = '' }) {
         strapTopLeft.set(-0.65, 2.90, -0.15);
         strapTopRight.set(0.65, 2.90, -0.05);
       } else {
-        camera.fov = 38;
-        camera.position.set(0.08, 0.40, 5.4);
+        camera.fov = 40;
+        camera.position.set(0.08, 0.22, 5.6);
         baseRestX = 0.12;
-        baseRestY = -0.36;
+        baseRestY = -0.20;
         targetRestAngleZ = -0.08;
         targetRestAngleY = 0.08;
-        strapTopLeft.set(-0.65, 2.75, -0.15);
-        strapTopRight.set(0.65, 2.75, -0.05);
+        strapTopLeft.set(-0.65, 2.90, -0.15);
+        strapTopRight.set(0.65, 2.90, -0.05);
       }
     }
 
@@ -93,181 +103,435 @@ export default function Lanyard({ className = '' }) {
     rimLight.position.set(1.5, 3.0, -2.5);
     scene.add(rimLight);
 
-    // Helper function to draw the exact S&O Maritime Emblem
-    function drawSOLogo(ctx, cx, cy, r, onDark = true) {
+    // Helper function to draw the minimal symmetrical Leaf Logo Vector
+    function drawLeafLogo(ctx, cx, cy, size, color, strokeW = 8) {
       ctx.save();
-      ctx.translate(cx, cy);
-
-      // Upper Wave (Maritime Blue #0072ce)
-      ctx.fillStyle = '#0072ce';
-      ctx.beginPath();
-      // Outer arc sweeping along top-right circumference
-      ctx.arc(0, 0, r, -Math.PI * 0.85, Math.PI * 0.22, false);
-      // Dynamic inner contour sweeping down towards center and tapering into lower-left tail
-      ctx.bezierCurveTo(r * 0.70, r * 0.50, r * 0.20, r * 0.42, -r * 0.12, r * 0.18);
-      ctx.bezierCurveTo(r * 0.14, -r * 0.15, r * 0.30, -r * 0.52, -r * 0.12, -r * 0.85);
-      ctx.closePath();
-      ctx.fill();
-
-      // Lower Wave (Vibrant Orange #f26522)
-      ctx.fillStyle = '#f26522';
-      ctx.beginPath();
-      // Outer arc sweeping along bottom-left circumference
-      ctx.arc(0, 0, r, Math.PI * 0.15, -Math.PI * 0.78, false);
-      // Dynamic inner contour sweeping up towards center and tapering into upper-right tail
-      ctx.bezierCurveTo(-r * 0.70, -r * 0.50, -r * 0.20, -r * 0.42, r * 0.12, -r * 0.18);
-      ctx.bezierCurveTo(-r * 0.14, r * 0.15, -r * 0.30, r * 0.52, 0.12, r * 0.85);
-      ctx.closePath();
-      ctx.fill();
-
-      // Crisp White Wave Separator Contour
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = r * 0.11;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = strokeW;
       ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Center petal (pointed oval)
+      const c_base_y = cy - size * 0.46;
+      const c_tip_y = cy - size * 0.98;
+
       ctx.beginPath();
-      ctx.moveTo(-r * 0.80, -r * 0.10);
-      ctx.bezierCurveTo(-r * 0.25, r * 0.52, r * 0.25, -r * 0.52, r * 0.80, 0.10);
+      ctx.moveTo(cx, c_base_y);
+      ctx.bezierCurveTo(cx - size * 0.16, cy - size * 0.58, cx - size * 0.16, cy - size * 0.86, cx, c_tip_y);
+      ctx.bezierCurveTo(cx + size * 0.16, cy - size * 0.86, cx + size * 0.16, cy - size * 0.58, cx, c_base_y);
+      ctx.stroke();
+
+      // Stem
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size * 0.22);
+      ctx.lineTo(cx, cy + size * 0.05);
+      ctx.stroke();
+
+      // Left petal
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size * 0.22);
+      ctx.bezierCurveTo(cx - size * 0.20, cy - size * 0.24, cx - size * 0.50, cy - size * 0.46, cx - size * 0.44, cy - size * 0.65);
+      ctx.bezierCurveTo(cx - size * 0.35, cy - size * 0.75, cx - size * 0.06, cy - size * 0.55, cx, cy - size * 0.35);
+      ctx.stroke();
+
+      // Right petal
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size * 0.22);
+      ctx.bezierCurveTo(cx + size * 0.20, cy - size * 0.24, cx + size * 0.50, cy - size * 0.46, cx + size * 0.44, cy - size * 0.65);
+      ctx.bezierCurveTo(cx + size * 0.35, cy - size * 0.75, cx + size * 0.06, cy - size * 0.55, cx, cy - size * 0.35);
       ctx.stroke();
 
       ctx.restore();
     }
 
-    // 3. Ultra High-Resolution S&O Maritime Dual Strap Texture (512 x 4096)
+    // Function to render the wide flat woven fabric lanyard strap
+    function renderLanyardStrap(canvas, currentTheme = 'dark') {
+      const isDark = currentTheme === 'dark';
+      const sCtx = canvas.getContext('2d');
+      sCtx.clearRect(0, 0, 512, 4096);
+
+      // 1. Premium Woven Textile Base (Ivory/White in light, Deep Charcoal/Black in dark)
+      sCtx.fillStyle = isDark ? '#141318' : '#faf7f3';
+      sCtx.fillRect(0, 0, 512, 4096);
+
+      // 2. Subtle Repeating Abstract Pattern (Flowing Jacquard / Woven Ribbons)
+      for (let offset = 0; offset < 4096; offset += 512) {
+        sCtx.save();
+        sCtx.fillStyle = isDark ? 'rgba(165, 125, 230, 0.09)' : 'rgba(160, 130, 205, 0.12)';
+
+        // Fluid sinusoidal jacquard weave 1
+        sCtx.beginPath();
+        sCtx.moveTo(0, offset + 40);
+        sCtx.bezierCurveTo(170, offset + 120, 340, offset + 240, 512, offset + 320);
+        sCtx.lineTo(512, offset + 440);
+        sCtx.bezierCurveTo(340, offset + 360, 170, offset + 240, 0, offset + 160);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Fluid sinusoidal jacquard weave 2 (Counter flow)
+        sCtx.fillStyle = isDark ? 'rgba(135, 95, 205, 0.07)' : 'rgba(185, 150, 225, 0.09)';
+        sCtx.beginPath();
+        sCtx.moveTo(512, offset + 80);
+        sCtx.bezierCurveTo(340, offset + 160, 170, offset + 280, 0, offset + 360);
+        sCtx.lineTo(0, offset + 480);
+        sCtx.bezierCurveTo(170, offset + 400, 340, offset + 280, 512, offset + 200);
+        sCtx.closePath();
+        sCtx.fill();
+
+        // Subtle Repeating Minimal Leaf Jacquard Accent
+        const leafColor = isDark ? 'rgba(180, 150, 235, 0.18)' : 'rgba(145, 115, 185, 0.22)';
+        drawLeafLogo(sCtx, 256, offset + 256, 52, leafColor, 5);
+
+        sCtx.restore();
+      }
+
+      // 3. Fine Woven Polyester Grosgrain Micro-Ribbing
+      for (let y = 0; y < 4096; y += 6) {
+        sCtx.fillStyle = isDark
+          ? (y % 12 === 0 ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.20)')
+          : (y % 12 === 0 ? 'rgba(255, 255, 255, 0.45)' : 'rgba(120, 100, 140, 0.07)');
+        sCtx.fillRect(0, y, 512, 3);
+      }
+
+      // 4. Selvage Edge Borders
+      sCtx.fillStyle = isDark ? 'rgba(0, 0, 0, 0.28)' : 'rgba(130, 110, 150, 0.10)';
+      sCtx.fillRect(0, 0, 16, 4096);
+      sCtx.fillRect(496, 0, 16, 4096);
+      sCtx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(255, 255, 255, 0.50)';
+      sCtx.fillRect(16, 0, 4, 4096);
+      sCtx.fillRect(492, 0, 4, 4096);
+
+      // 5. Realistic Dashed Edge Stitching
+      sCtx.strokeStyle = isDark ? 'rgba(180, 150, 230, 0.25)' : 'rgba(145, 115, 185, 0.35)';
+      sCtx.lineWidth = 2.5;
+      sCtx.setLineDash([8, 8]);
+      sCtx.beginPath();
+      sCtx.moveTo(28, 0);
+      sCtx.lineTo(28, 4096);
+      sCtx.moveTo(484, 0);
+      sCtx.lineTo(484, 4096);
+      sCtx.stroke();
+      sCtx.setLineDash([]);
+    }
+
+    // High-Res Texture for Safety Buckle Collar (512 x 512)
+    function renderCollar(canvas, currentTheme = 'dark') {
+      const isDark = currentTheme === 'dark';
+      const cCtx = canvas.getContext('2d');
+      cCtx.clearRect(0, 0, 512, 512);
+
+      cCtx.fillStyle = isDark ? '#1a1822' : '#f5f0ea';
+      cCtx.fillRect(0, 0, 512, 512);
+
+      for (let y = 0; y < 512; y += 6) {
+        cCtx.fillStyle = isDark
+          ? (y % 12 === 0 ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.20)')
+          : (y % 12 === 0 ? 'rgba(255, 255, 255, 0.40)' : 'rgba(120, 100, 140, 0.08)');
+        cCtx.fillRect(0, y, 512, 3);
+      }
+      const leafColor = isDark ? '#c5b0e8' : '#654b84';
+      drawLeafLogo(cCtx, 256, 256, 110, leafColor, 8);
+    }
+
+    // Function to render the 2000 x 3280 Front and Back ID Badge Faces
+    function renderCardFace(canvas, currentTheme = 'dark', isBack = false, photo = null) {
+      const isDark = currentTheme === 'dark';
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 2000, 3280);
+
+      // 1. Base Canvas Gradient
+      const baseGrad = ctx.createLinearGradient(0, 0, 2000, 3280);
+      if (isDark) {
+        baseGrad.addColorStop(0, '#15131d');
+        baseGrad.addColorStop(0.5, '#121018');
+        baseGrad.addColorStop(1, '#0e0c13');
+      } else {
+        baseGrad.addColorStop(0, '#f9f5ee');
+        baseGrad.addColorStop(0.5, '#f4ece2');
+        baseGrad.addColorStop(1, '#eee2d4');
+      }
+      ctx.fillStyle = baseGrad;
+      ctx.fillRect(0, 0, 2000, 3280);
+
+      // 2. Soft Edge Shapes / Translucent Flowing Ribbons
+      ctx.save();
+      if (isDark) {
+        // Restrained violet abstract shapes
+        ctx.fillStyle = 'rgba(125, 80, 185, 0.16)';
+        ctx.beginPath();
+        ctx.moveTo(700, 0);
+        ctx.bezierCurveTo(1200, 200, 1800, 600, 2000, 1200);
+        ctx.lineTo(2000, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(155, 105, 220, 0.10)';
+        ctx.beginPath();
+        ctx.moveTo(1100, 0);
+        ctx.bezierCurveTo(1500, 350, 1850, 800, 2000, 1500);
+        ctx.lineTo(2000, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // Bottom abstract curve
+        ctx.fillStyle = 'rgba(110, 70, 170, 0.14)';
+        ctx.beginPath();
+        ctx.moveTo(0, 2400);
+        ctx.bezierCurveTo(300, 2600, 900, 3100, 1600, 3280);
+        ctx.lineTo(0, 3280);
+        ctx.closePath();
+        ctx.fill();
+
+        // Frosted obsidian glass highlight sheen
+        const sheen = ctx.createLinearGradient(0, 0, 2000, 2000);
+        sheen.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
+        sheen.addColorStop(0.3, 'rgba(255, 255, 255, 0.015)');
+        sheen.addColorStop(0.6, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = sheen;
+        ctx.fillRect(0, 0, 2000, 3280);
+
+        // Subtle edge vignette / glow
+        ctx.strokeStyle = 'rgba(150, 105, 230, 0.15)';
+        ctx.lineWidth = 12;
+        ctx.strokeRect(6, 6, 1988, 3268);
+      } else {
+        // Soft lavender / pale-pink edge shapes
+        ctx.fillStyle = 'rgba(224, 210, 240, 0.40)';
+        ctx.beginPath();
+        ctx.moveTo(600, 0);
+        ctx.bezierCurveTo(1150, 180, 1750, 580, 2000, 1150);
+        ctx.lineTo(2000, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(242, 226, 238, 0.32)';
+        ctx.beginPath();
+        ctx.moveTo(1050, 0);
+        ctx.bezierCurveTo(1450, 320, 1820, 750, 2000, 1400);
+        ctx.lineTo(2000, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // Bottom pale pink/lavender curve
+        ctx.fillStyle = 'rgba(220, 202, 236, 0.30)';
+        ctx.beginPath();
+        ctx.moveTo(0, 2450);
+        ctx.bezierCurveTo(350, 2650, 950, 3120, 1650, 3280);
+        ctx.lineTo(0, 3280);
+        ctx.closePath();
+        ctx.fill();
+
+        // Frosted acrylic glass highlight sheen
+        const sheen = ctx.createLinearGradient(0, 0, 2000, 2000);
+        sheen.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
+        sheen.addColorStop(0.35, 'rgba(255, 255, 255, 0.10)');
+        sheen.addColorStop(0.7, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = sheen;
+        ctx.fillRect(0, 0, 2000, 3280);
+
+        // Soft lavender edge vignette
+        ctx.strokeStyle = 'rgba(165, 130, 210, 0.12)';
+        ctx.lineWidth = 12;
+        ctx.strokeRect(6, 6, 1988, 3268);
+      }
+      ctx.restore();
+
+      // 3. Rounded Punch Slot Bezel (at top center)
+      ctx.save();
+      const slotW = 280;
+      const slotH = 68;
+      const slotR = 34;
+      const slotX = 1000 - slotW / 2;
+      const slotY = 124 - slotH / 2;
+      ctx.beginPath();
+      ctx.roundRect(slotX, slotY, slotW, slotH, slotR);
+      ctx.strokeStyle = isDark ? 'rgba(200, 170, 255, 0.22)' : 'rgba(150, 120, 185, 0.28)';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
+
+      if (!isBack) {
+        // ================= FRONT FACE =================
+        // A. Subtle Minimal Decorative Mark (above photo)
+        const markColor = isDark ? '#cbb3ed' : '#5b3d7a';
+        drawLeafLogo(ctx, 1000, 370, 88, markColor, 7);
+
+        // B. Portrait Frame & Image (Prominent, balanced ID photo)
+        const pW = 1360;
+        const pH = 1540;
+        const pX = 1000 - pW / 2;
+        const pY = 550;
+        const pR = 72;
+
+        ctx.save();
+        // Soft diffuse drop shadow
+        ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.65)' : 'rgba(70, 40, 110, 0.14)';
+        ctx.shadowBlur = isDark ? 42 : 32;
+        ctx.shadowOffsetY = 18;
+
+        ctx.beginPath();
+        ctx.roundRect(pX, pY, pW, pH, pR);
+        ctx.fillStyle = isDark ? '#1a1725' : '#ffffff';
+        ctx.fill();
+        ctx.restore();
+
+        // Draw portrait image
+        if (photo && photo.complete && photo.naturalWidth > 0) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.roundRect(pX, pY, pW, pH, pR);
+          ctx.clip();
+          // Scale to fill nicely while preserving natural portrait framing
+          const imgAspect = photo.naturalWidth / photo.naturalHeight;
+          const frameAspect = pW / pH;
+          let drawW = pW;
+          let drawH = pH;
+          let drawX = pX;
+          let drawY = pY;
+          if (imgAspect > frameAspect) {
+            drawW = pH * imgAspect;
+            drawX = pX + (pW - drawW) / 2;
+          } else {
+            drawH = pW / imgAspect;
+            drawY = pY + (pH - drawH) / 2;
+          }
+          ctx.drawImage(photo, drawX, drawY, drawW, drawH);
+          ctx.restore();
+        }
+
+        // Hairline border over portrait
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(pX, pY, pW, pH, pR);
+        ctx.strokeStyle = isDark ? 'rgba(190, 160, 240, 0.42)' : 'rgba(165, 135, 200, 0.50)';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        ctx.restore();
+
+        // C. Typography - "ALEENA R"
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.letterSpacing = '14px';
+
+        if (isDark) {
+          ctx.font = '700 116px "Plus Jakarta Sans", system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = '#f6f2fc';
+          ctx.shadowColor = 'rgba(195, 160, 250, 0.45)';
+          ctx.shadowBlur = 20;
+        } else {
+          ctx.font = '800 120px "Plus Jakarta Sans", system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = '#1c0e30';
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+        }
+        ctx.fillText('ALEENA R', 1000, 2330);
+        ctx.restore();
+
+        // D. Small Elegant Divider
+        ctx.save();
+        const divW = 420;
+        const divGrad = ctx.createLinearGradient(1000 - divW / 2, 2470, 1000 + divW / 2, 2470);
+        if (isDark) {
+          divGrad.addColorStop(0, 'rgba(190, 160, 240, 0)');
+          divGrad.addColorStop(0.5, 'rgba(190, 160, 240, 0.65)');
+          divGrad.addColorStop(1, 'rgba(190, 160, 240, 0)');
+        } else {
+          divGrad.addColorStop(0, 'rgba(130, 85, 175, 0)');
+          divGrad.addColorStop(0.5, 'rgba(130, 85, 175, 0.85)');
+          divGrad.addColorStop(1, 'rgba(130, 85, 175, 0)');
+        }
+        ctx.fillStyle = divGrad;
+        ctx.fillRect(1000 - divW / 2, 2467, divW, 4.5);
+        ctx.restore();
+
+        // E. Typography - "HR INTERN"
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.letterSpacing = '18px';
+        if (isDark) {
+          ctx.font = '600 58px "Plus Jakarta Sans", system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = '#c5b0e8';
+        } else {
+          ctx.font = '700 62px "Plus Jakarta Sans", system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = '#4f2f71';
+        }
+        ctx.fillText('HR INTERN', 1000, 2600);
+        ctx.restore();
+
+      } else {
+        // ================= BACK FACE =================
+        // Minimal Executive Credential
+        const markColor = isDark ? '#d0b8f4' : '#573a76';
+        drawLeafLogo(ctx, 1000, 1260, 180, markColor, 9);
+
+        // "ALEENA R"
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.letterSpacing = '16px';
+        if (isDark) {
+          ctx.font = '700 98px "Plus Jakarta Sans", system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = '#f6f2fc';
+          ctx.shadowColor = 'rgba(195, 160, 250, 0.40)';
+          ctx.shadowBlur = 18;
+        } else {
+          ctx.font = '800 104px "Plus Jakarta Sans", system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = '#1c0e30';
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
+        }
+        ctx.fillText('ALEENA R', 1000, 1620);
+        ctx.restore();
+
+        // Divider
+        ctx.save();
+        const divW = 320;
+        const divGrad = ctx.createLinearGradient(1000 - divW / 2, 1730, 1000 + divW / 2, 1730);
+        if (isDark) {
+          divGrad.addColorStop(0, 'rgba(190, 160, 240, 0)');
+          divGrad.addColorStop(0.5, 'rgba(190, 160, 240, 0.60)');
+          divGrad.addColorStop(1, 'rgba(190, 160, 240, 0)');
+        } else {
+          divGrad.addColorStop(0, 'rgba(130, 85, 175, 0)');
+          divGrad.addColorStop(0.5, 'rgba(130, 85, 175, 0.80)');
+          divGrad.addColorStop(1, 'rgba(130, 85, 175, 0)');
+        }
+        ctx.fillStyle = divGrad;
+        ctx.fillRect(1000 - divW / 2, 1728, divW, 4);
+        ctx.restore();
+
+        // "HR INTERN"
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.letterSpacing = '18px';
+        if (isDark) {
+          ctx.font = '600 50px "Plus Jakarta Sans", system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = '#c5b0e8';
+        } else {
+          ctx.font = '700 54px "Plus Jakarta Sans", system-ui, -apple-system, sans-serif';
+          ctx.fillStyle = '#4f2f71';
+        }
+        ctx.fillText('HR INTERN', 1000, 1840);
+        ctx.restore();
+      }
+    }
+
+    // 3. Ultra High-Resolution Matching Dual Strap Textures (512 x 4096)
     const strapCanvas = document.createElement('canvas');
     strapCanvas.width = 512;
     strapCanvas.height = 4096;
-    const sCtx = strapCanvas.getContext('2d');
-    sCtx.imageSmoothingEnabled = true;
-    sCtx.imageSmoothingQuality = 'high';
 
-    // Rich Corporate Maritime Navy Blue Base
-    sCtx.fillStyle = '#0a223f';
-    sCtx.fillRect(0, 0, 512, 4096);
-
-    // Fine Woven Polyester Grosgrain Micro-Ribbing
-    for (let y = 0; y < 4096; y += 6) {
-      sCtx.fillStyle = y % 12 === 0 ? 'rgba(255, 255, 255, 0.035)' : 'rgba(0, 0, 0, 0.22)';
-      sCtx.fillRect(0, y, 512, 3);
-    }
-
-    // Selvage Edge Weave Lines
-    sCtx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-    sCtx.fillRect(0, 0, 14, 4096);
-    sCtx.fillRect(498, 0, 14, 4096);
-    sCtx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-    sCtx.fillRect(14, 0, 4, 4096);
-    sCtx.fillRect(494, 0, 4, 4096);
-
-    // Draw Repeating S&O Maritime Branding Cycles along Strap Length
-    for (let offset = 0; offset < 4096; offset += 2048) {
-      // Top S&O Logo
-      drawSOLogo(sCtx, 256, offset + 140, 80, true);
-
-      // S&O (Bold Serif, Pure White)
-      sCtx.fillStyle = '#ffffff';
-      sCtx.font = '800 68px "Playfair Display", "Cinzel", "Georgia", serif';
-      sCtx.textAlign = 'center';
-      sCtx.textBaseline = 'middle';
-      sCtx.letterSpacing = '4px';
-      sCtx.fillText('S&O', 256, offset + 285);
-
-      // MARITIME (Bold Sans-Serif, Spaced)
-      sCtx.font = '800 36px "Plus Jakarta Sans", sans-serif';
-      sCtx.letterSpacing = '14px';
-      sCtx.fillText('MARITIME', 256, offset + 360);
-
-      // Vibrant Orange Accent Divider Bar
-      sCtx.fillStyle = '#f26522';
-      sCtx.beginPath();
-      sCtx.roundRect(256 - 75, offset + 408, 150, 8, [4]);
-      sCtx.fill();
-
-      // Corporate Motto along Strap Length (Rotated 90 deg, reading top-to-bottom)
-      sCtx.save();
-      sCtx.translate(256, offset + 1040);
-      sCtx.rotate(Math.PI / 2);
-      sCtx.fillStyle = '#ffffff';
-      sCtx.font = '700 28px "Plus Jakarta Sans", sans-serif';
-      sCtx.letterSpacing = '6px';
-      sCtx.textAlign = 'center';
-      sCtx.textBaseline = 'middle';
-      sCtx.fillText('PEOPLE | IDEAS | CULTURE | GROWTH', 0, 0);
-      sCtx.restore();
-
-      // Lower S&O Logo before junction
-      drawSOLogo(sCtx, 256, offset + 1750, 75, true);
-    }
-
-    // Reverse Side Texture (Matching "BACK VIEW" White Ribbon in Brand Specification)
     const strapBackCanvas = document.createElement('canvas');
     strapBackCanvas.width = 512;
     strapBackCanvas.height = 4096;
-    const sbCtx = strapBackCanvas.getContext('2d');
-    sbCtx.imageSmoothingEnabled = true;
-    sbCtx.imageSmoothingQuality = 'high';
 
-    sbCtx.fillStyle = '#f8f9fc';
-    sbCtx.fillRect(0, 0, 512, 4096);
-
-    for (let y = 0; y < 4096; y += 6) {
-      sbCtx.fillStyle = y % 12 === 0 ? 'rgba(0, 0, 0, 0.035)' : 'rgba(0, 0, 0, 0.015)';
-      sbCtx.fillRect(0, y, 512, 3);
-    }
-
-    sbCtx.fillStyle = 'rgba(0, 0, 0, 0.06)';
-    sbCtx.fillRect(0, 0, 14, 4096);
-    sbCtx.fillRect(498, 0, 14, 4096);
-
-    for (let offset = 0; offset < 4096; offset += 2048) {
-      drawSOLogo(sbCtx, 256, offset + 140, 80, false);
-
-      sbCtx.fillStyle = '#0a223f';
-      sbCtx.font = '800 68px "Playfair Display", "Cinzel", "Georgia", serif';
-      sbCtx.textAlign = 'center';
-      sbCtx.textBaseline = 'middle';
-      sbCtx.letterSpacing = '4px';
-      sbCtx.fillText('S&O', 256, offset + 285);
-
-      sbCtx.font = '800 36px "Plus Jakarta Sans", sans-serif';
-      sbCtx.letterSpacing = '14px';
-      sbCtx.fillText('MARITIME', 256, offset + 360);
-
-      sbCtx.fillStyle = '#f26522';
-      sbCtx.beginPath();
-      sbCtx.roundRect(256 - 75, offset + 408, 150, 8, [4]);
-      sbCtx.fill();
-
-      sbCtx.save();
-      sbCtx.translate(256, offset + 1040);
-      sbCtx.rotate(Math.PI / 2);
-      sbCtx.fillStyle = '#0a223f';
-      sbCtx.font = '700 28px "Plus Jakarta Sans", sans-serif';
-      sbCtx.letterSpacing = '6px';
-      sbCtx.textAlign = 'center';
-      sbCtx.textBaseline = 'middle';
-      sbCtx.fillText('PEOPLE | IDEAS | CULTURE | GROWTH', 0, 0);
-      sbCtx.restore();
-
-      drawSOLogo(sbCtx, 256, offset + 1750, 75, false);
-    }
-
-    // High-Res Texture for White Fabric Tab & Breakaway Buckle Connector (512 x 512)
-    const whiteTabCanvas = document.createElement('canvas');
-    whiteTabCanvas.width = 512;
-    whiteTabCanvas.height = 512;
-    const wtCtx = whiteTabCanvas.getContext('2d');
-    wtCtx.imageSmoothingEnabled = true;
-    wtCtx.imageSmoothingQuality = 'high';
-
-    wtCtx.fillStyle = '#ffffff';
-    wtCtx.fillRect(0, 0, 512, 512);
-
-    for (let y = 0; y < 512; y += 6) {
-      wtCtx.fillStyle = y % 12 === 0 ? 'rgba(0, 0, 0, 0.035)' : 'rgba(0, 0, 0, 0.015)';
-      wtCtx.fillRect(0, y, 512, 3);
-    }
-
-    drawSOLogo(wtCtx, 256, 256, 145, false);
+    // High-Res Texture for Matching Safety Buckle Collar (512 x 512)
+    const collarCanvas = document.createElement('canvas');
+    collarCanvas.width = 512;
+    collarCanvas.height = 512;
 
     const strapTexture = new THREE.CanvasTexture(strapCanvas);
     strapTexture.wrapS = THREE.RepeatWrapping;
@@ -283,26 +547,26 @@ export default function Lanyard({ className = '' }) {
     strapBackTexture.anisotropy = maxAnisotropy;
     strapBackTexture.colorSpace = THREE.SRGBColorSpace;
 
-    const whiteTabTexture = new THREE.CanvasTexture(whiteTabCanvas);
-    whiteTabTexture.anisotropy = maxAnisotropy;
-    whiteTabTexture.colorSpace = THREE.SRGBColorSpace;
+    const collarTexture = new THREE.CanvasTexture(collarCanvas);
+    collarTexture.anisotropy = maxAnisotropy;
+    collarTexture.colorSpace = THREE.SRGBColorSpace;
 
     const strapMaterial = new THREE.MeshStandardMaterial({
       map: strapTexture,
-      roughness: 0.68,
+      roughness: 0.65,
       metalness: 0.08,
       side: THREE.FrontSide
     });
 
     const strapMaterialBack = new THREE.MeshStandardMaterial({
       map: strapBackTexture,
-      roughness: 0.68,
+      roughness: 0.65,
       metalness: 0.08,
       side: THREE.BackSide
     });
 
-    const whiteTabMaterial = new THREE.MeshStandardMaterial({
-      map: whiteTabTexture,
+    const collarMaterial = new THREE.MeshStandardMaterial({
+      map: collarTexture,
       roughness: 0.65,
       metalness: 0.08,
       side: THREE.DoubleSide
@@ -371,168 +635,92 @@ export default function Lanyard({ className = '' }) {
       geo.computeVertexNormals();
     }
 
-    // 4. Physical Breakaway Buckle & Swivel Lobster Snap Assembly
-    const metalMaterial = new THREE.MeshStandardMaterial({
-      color: 0xe2e4ea,
-      metalness: 0.95,
-      roughness: 0.18
-    });
-
-    const plasticMaterial = new THREE.MeshStandardMaterial({
-      color: 0x181a20,
-      roughness: 0.55,
-      metalness: 0.12
-    });
-
-    const plasticAccentMaterial = new THREE.MeshStandardMaterial({
-      color: 0x0f1014,
-      roughness: 0.65,
-      metalness: 0.1
+    // 4. Physical Premium Metal Hardware Material (Swapped: Dark style for Light mode, Light style for Dark mode)
+    const isInitialDark = (theme || 'dark') === 'light';
+    const metalMaterial = new THREE.MeshPhysicalMaterial({
+      color: isInitialDark ? 0x282a32 : 0xe2e4ea,
+      metalness: isInitialDark ? 0.92 : 0.88,
+      roughness: isInitialDark ? 0.28 : 0.22,
+      clearcoat: isInitialDark ? 0.35 : 0.60,
+      clearcoatRoughness: 0.08
     });
 
     const claspGroup = new THREE.Group();
 
-    // A. Silver Lobster Trigger Snap Hook (Through Punch Hole)
-    const hookTorus = new THREE.Mesh(
-      new THREE.TorusGeometry(0.075, 0.022, 16, 24, Math.PI * 1.55),
+    // A. Realistic Swivel Lobster Clip Hook (passes through punched slot hole at y = -0.10)
+    const hookCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, -0.04, 0.02),
+      new THREE.Vector3(0.03, -0.07, 0.015),
+      new THREE.Vector3(0.02, -0.11, 0),       // passes through slot
+      new THREE.Vector3(-0.02, -0.11, 0),      // bottom loop through slot
+      new THREE.Vector3(-0.03, -0.07, -0.015),
+      new THREE.Vector3(0, -0.04, -0.02)
+    ]);
+    const hookGeo = new THREE.TubeGeometry(hookCurve, 24, 0.011, 10, false);
+    const hookMesh = new THREE.Mesh(hookGeo, metalMaterial);
+    claspGroup.add(hookMesh);
+
+    // Lobster clip solid body
+    const clipBody = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.036, 0.028, 0.09, 16),
       metalMaterial
     );
-    hookTorus.rotation.z = Math.PI / 4;
-    hookTorus.position.set(0, 0.02, 0);
-    claspGroup.add(hookTorus);
+    clipBody.position.set(0, 0.005, 0);
+    claspGroup.add(clipBody);
 
-    const triggerLever = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.012, 0.012, 0.07, 12),
+    // Spring lever / trigger tab on the clip side
+    const clipLever = new THREE.Mesh(
+      new THREE.BoxGeometry(0.016, 0.05, 0.035),
       metalMaterial
     );
-    triggerLever.position.set(0.045, 0.055, 0);
-    triggerLever.rotation.z = -Math.PI / 4;
-    claspGroup.add(triggerLever);
+    clipLever.position.set(0.032, 0.01, 0);
+    clipLever.rotation.z = -0.25;
+    claspGroup.add(clipLever);
 
-    const hookEyelet = new THREE.Mesh(
-      new THREE.TorusGeometry(0.038, 0.016, 14, 20),
+    // B. Precision Swivel Joint (Barrel & Eyelet)
+    const swivelCollar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.042, 0.042, 0.032, 18),
       metalMaterial
     );
-    hookEyelet.position.set(0, 0.11, 0);
-    claspGroup.add(hookEyelet);
+    swivelCollar.position.set(0, 0.065, 0);
+    claspGroup.add(swivelCollar);
 
-    // B. Silver Precision Swivel Barrel
-    const swivelBarrel = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.036, 0.036, 0.09, 20),
+    const swivelEyelet = new THREE.Mesh(
+      new THREE.TorusGeometry(0.038, 0.010, 10, 18),
       metalMaterial
     );
-    swivelBarrel.position.set(0, 0.18, 0);
-    claspGroup.add(swivelBarrel);
+    swivelEyelet.position.set(0, 0.105, 0);
+    swivelEyelet.rotation.y = Math.PI / 2;
+    claspGroup.add(swivelEyelet);
 
-    const swivelRingTop = new THREE.Mesh(
-      new THREE.TorusGeometry(0.038, 0.010, 12, 18),
+    // C. Small Circular Metal Ring (Split/Jump Ring)
+    const metalRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.068, 0.012, 12, 24),
       metalMaterial
     );
-    swivelRingTop.position.set(0, 0.22, 0);
-    swivelRingTop.rotation.x = Math.PI / 2;
-    claspGroup.add(swivelRingTop);
+    metalRing.position.set(0, 0.175, 0);
+    claspGroup.add(metalRing);
 
-    const swivelRingBot = new THREE.Mesh(
-      new THREE.TorusGeometry(0.038, 0.010, 12, 18),
+    // D. Compact Safety Buckle / Collar (holds the woven lanyard strap)
+    const safetyBuckle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.24, 0.11, 0.045),
+      collarMaterial
+    );
+    safetyBuckle.position.set(0, 0.265, 0);
+    claspGroup.add(safetyBuckle);
+
+    // Buckle accent trim (fine metal border)
+    const buckleTrim = new THREE.Mesh(
+      new THREE.BoxGeometry(0.25, 0.022, 0.048),
       metalMaterial
     );
-    swivelRingBot.position.set(0, 0.14, 0);
-    swivelRingBot.rotation.x = Math.PI / 2;
-    claspGroup.add(swivelRingBot);
+    buckleTrim.position.set(0, 0.265, 0);
+    claspGroup.add(buckleTrim);
 
-    // C. Silver Flat Wire D-Ring / Loop
-    const dRing = new THREE.Mesh(
-      new THREE.TorusGeometry(0.085, 0.016, 14, 24),
-      metalMaterial
-    );
-    dRing.position.set(0, 0.27, 0);
-    dRing.scale.set(1.4, 0.55, 1.0);
-    claspGroup.add(dRing);
-
-    // D. Lower White Ribbon Tab (Loop holding D-ring to Buckle)
-    const lowerWhiteTab = new THREE.Mesh(
-      new THREE.BoxGeometry(0.24, 0.14, 0.022),
-      whiteTabMaterial
-    );
-    lowerWhiteTab.position.set(0, 0.38, 0);
-    claspGroup.add(lowerWhiteTab);
-
-    // E. Black Plastic Quick-Release Buckle
-    const buckleGroup = new THREE.Group();
-    buckleGroup.position.set(0, 0.52, 0);
-
-    const buckleBody = new THREE.Mesh(
-      new THREE.BoxGeometry(0.29, 0.15, 0.052),
-      plasticMaterial
-    );
-    buckleGroup.add(buckleBody);
-
-    const sideTabL = new THREE.Mesh(
-      new THREE.BoxGeometry(0.03, 0.08, 0.046),
-      plasticAccentMaterial
-    );
-    sideTabL.position.set(-0.155, 0, 0);
-    buckleGroup.add(sideTabL);
-
-    const sideTabR = new THREE.Mesh(
-      new THREE.BoxGeometry(0.03, 0.08, 0.046),
-      plasticAccentMaterial
-    );
-    sideTabR.position.set(0.155, 0, 0);
-    buckleGroup.add(sideTabR);
-
-    const latchGroove = new THREE.Mesh(
-      new THREE.BoxGeometry(0.26, 0.012, 0.055),
-      plasticAccentMaterial
-    );
-    buckleGroup.add(latchGroove);
-    claspGroup.add(buckleGroup);
-
-    // F. Upper White Chevron Tab (Triangular Junction where blue straps converge)
-    const chevronGeo = new THREE.BufferGeometry();
-    const cwB = 0.12;
-    const cwT = 0.16;
-    const ch = 0.14;
-    const cd = 0.012;
-
-    const chevronPos = [
-      -cwB, 0, cd,   cwB, 0, cd,   -cwT, ch, cd,
-       cwB, 0, cd,   cwT, ch, cd,  -cwT, ch, cd,
-      -cwB, 0, -cd,  -cwT, ch, -cd,  cwB, 0, -cd,
-       cwB, 0, -cd,  -cwT, ch, -cd,  cwT, ch, -cd,
-      -cwB, 0, -cd,  -cwB, 0, cd,   -cwT, ch, cd,
-      -cwB, 0, -cd,  -cwT, ch, cd,  -cwT, ch, -cd,
-       cwB, 0, -cd,   cwT, ch, cd,   cwB, 0, cd,
-       cwB, 0, -cd,   cwT, ch, -cd,  cwT, ch, cd,
-      -cwT, ch, cd,   cwT, ch, cd,  -cwT, ch, -cd,
-       cwT, ch, cd,   cwT, ch, -cd, -cwT, ch, -cd
-    ];
-
-    const chevronUVs = [
-      0.2, 0,  0.8, 0,  0.1, 1,
-      0.8, 0,  0.9, 1,  0.1, 1,
-      0.2, 0,  0.1, 1,  0.8, 0,
-      0.8, 0,  0.1, 1,  0.9, 1,
-      0, 0, 0.1, 0, 0.1, 1,  0, 0, 0.1, 1, 0, 1,
-      0.9, 0, 1, 1, 0.9, 1,  0.9, 0, 1, 0, 1, 1,
-      0, 0, 1, 0, 0, 1,  1, 0, 1, 1, 0, 1
-    ];
-
-    chevronGeo.setAttribute('position', new THREE.Float32BufferAttribute(chevronPos, 3));
-    chevronGeo.setAttribute('uv', new THREE.Float32BufferAttribute(chevronUVs, 2));
-    chevronGeo.computeVertexNormals();
-
-    const upperWhiteTab = new THREE.Mesh(chevronGeo, whiteTabMaterial);
-    upperWhiteTab.position.set(0, 0.60, 0);
-    claspGroup.add(upperWhiteTab);
-
-    // 5. ULTRA HIGH-RESOLUTION CARD CANVAS TEXTURE (2400 x 3600)
+    // 5. ULTRA HIGH-RESOLUTION CARD CANVAS TEXTURE (2000 x 3280)
     const cardCanvas = document.createElement('canvas');
-    cardCanvas.width = 2400;
-    cardCanvas.height = 3600;
-    const ctx = cardCanvas.getContext('2d');
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    cardCanvas.width = 2000;
+    cardCanvas.height = 3280;
 
     const cardTexture = new THREE.CanvasTexture(cardCanvas);
     cardTexture.generateMipmaps = true;
@@ -543,11 +731,8 @@ export default function Lanyard({ className = '' }) {
 
     // Dedicated Back Face Texture for Authentic 3D Realism
     const cardBackCanvas = document.createElement('canvas');
-    cardBackCanvas.width = 2400;
-    cardBackCanvas.height = 3600;
-    const bCtx = cardBackCanvas.getContext('2d');
-    bCtx.imageSmoothingEnabled = true;
-    bCtx.imageSmoothingQuality = 'high';
+    cardBackCanvas.width = 2000;
+    cardBackCanvas.height = 3280;
 
     const cardBackTexture = new THREE.CanvasTexture(cardBackCanvas);
     cardBackTexture.generateMipmaps = true;
@@ -556,311 +741,296 @@ export default function Lanyard({ className = '' }) {
     cardBackTexture.anisotropy = maxAnisotropy;
     cardBackTexture.colorSpace = THREE.SRGBColorSpace;
 
-    // Assets for Authentic Two-Sided Credential (Design 5: Executive Premium & Design 6: Minimal Professional)
-    const frontBaseImg = new Image();
-    frontBaseImg.crossOrigin = 'anonymous';
-    frontBaseImg.src = `${import.meta.env.BASE_URL}assets/images/id_card_front_clean.png`;
-
-    const backBaseImg = new Image();
-    backBaseImg.crossOrigin = 'anonymous';
-    backBaseImg.src = `${import.meta.env.BASE_URL}assets/images/id_card_back_clean.png`;
-
-
-    // FRONT SIDE — DESIGN 5: EXECUTIVE PREMIUM
-    function drawExactCard() {
-      // 1. Deep Maritime Navy Blue Background
-      ctx.fillStyle = '#06182e';
-      ctx.fillRect(0, 0, 2400, 3600);
-
-      // 2. Executive Premium Front Design (Exact S&O Logo, Aleena R Photo, Corporate Typography, Ship & Orange Accent)
-      // Rendered exclusively once from authentic base artwork without any duplicate layers
-      if (frontBaseImg.complete && frontBaseImg.naturalWidth > 0) {
-        ctx.drawImage(frontBaseImg, 0, 0, 2400, 3600);
-      }
-
-      cardTexture.needsUpdate = true;
-    }
-
-    // BACK SIDE — DESIGN 6: MINIMAL PROFESSIONAL (ULTRA HIGH-RESOLUTION NATIVE TYPOGRAPHY & VECTORS)
-    function drawExactCardBack() {
-      // 1. Clean White / Light Card Face
-      bCtx.fillStyle = '#f9fafc';
-      bCtx.fillRect(0, 0, 2400, 3600);
-
-      // 2. Base Artwork (S&O Logo, Tagline, QR Code & Ocean Waves)
-      if (backBaseImg.complete && backBaseImg.naturalWidth > 0) {
-        bCtx.drawImage(backBaseImg, 0, 0, 2400, 3600);
-      }
-
-      // Sample background color in the details area
-      const bgSample = bCtx.getImageData(300, 1500, 1, 1).data;
-      const bgColor = `rgb(${bgSample[0]}, ${bgSample[1]}, ${bgSample[2]})`;
-
-      // Clear the details block across full card width
-      bCtx.fillStyle = bgColor;
-      bCtx.fillRect(100, 1120, 2200, 1180);
-
-      const iconColor = '#01173e';
-      const textColor = '#0a1634';
-      const textStartX = 635;
-      const iconCx = 396;
-
-      // 1. Person Icon
-      function drawPersonIcon(ctx, cx, cy) {
-        ctx.save();
-        ctx.fillStyle = iconColor;
-        ctx.beginPath();
-        ctx.arc(cx, cy - 24, 25, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        const bw = 50;
-        const by = cy + 8;
-        ctx.moveTo(cx - bw, by + 32);
-        ctx.bezierCurveTo(cx - bw, by + 8, cx - bw * 0.5, by, cx, by);
-        ctx.bezierCurveTo(cx + bw * 0.5, by, cx + bw, by + 8, cx + bw, by + 32);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // 2. Briefcase Icon
-      function drawBriefcaseIcon(ctx, cx, cy) {
-        ctx.save();
-        ctx.fillStyle = iconColor;
-        ctx.strokeStyle = iconColor;
-        ctx.lineWidth = 10;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(cx - 24, cy - 20);
-        ctx.lineTo(cx - 24, cy - 42);
-        ctx.bezierCurveTo(cx - 24, cy - 50, cx - 18, cy - 54, cx - 8, cy - 54);
-        ctx.lineTo(cx + 8, cy - 54);
-        ctx.bezierCurveTo(cx + 18, cy - 54, cx + 24, cy - 50, cx + 24, cy - 42);
-        ctx.lineTo(cx + 24, cy - 20);
-        ctx.stroke();
-
-        const w = 124;
-        const h = 78;
-        const x = cx - w / 2;
-        const y = cy - 20;
-        ctx.beginPath();
-        ctx.roundRect(x, y, w, h, [12]);
-        ctx.fill();
-
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(x + 10, cy + 14, w - 20, 5);
-
-        ctx.fillStyle = iconColor;
-        ctx.beginPath();
-        ctx.roundRect(cx - 10, cy + 8, 20, 18, [4]);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // 3. Building Icon (precisely centered at cx = 396)
-      function drawBuildingIcon(ctx, cx, cy) {
-        ctx.save();
-        ctx.fillStyle = iconColor;
-        const tw = 68;
-        const th = 110;
-        const tx = cx - 54;
-        const ty = cy - th / 2;
-        ctx.beginPath();
-        ctx.roundRect(tx, ty, tw, th, [6, 6, 0, 0]);
-        ctx.fill();
-
-        ctx.fillStyle = bgColor;
-        const winW = 10;
-        const winH = 14;
-        for (let r = 0; r < 3; r++) {
-          const wy = ty + 18 + r * 28;
-          ctx.fillRect(tx + 14, wy, winW, winH);
-          ctx.fillRect(tx + 44, wy, winW, winH);
-        }
-
-        const aw = 34;
-        const ah = 68;
-        const ax = tx + tw + 6;
-        const ay = ty + th - ah;
-        ctx.beginPath();
-        ctx.roundRect(ax, ay, aw, ah, [4, 4, 0, 0]);
-        ctx.fill();
-
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(ax + 12, ay + 14, winW, winH);
-        ctx.fillRect(ax + 12, ay + 42, winW, winH);
-
-        ctx.fillStyle = iconColor;
-        ctx.fillRect(cx - 56, ty + th - 2, 112, 8);
-        ctx.restore();
-      }
-
-      // 4. Pin Icon
-      function drawPinIcon(ctx, cx, cy) {
-        ctx.save();
-        ctx.fillStyle = iconColor;
-        const r = 36;
-        const pinY = cy - 14;
-        ctx.beginPath();
-        ctx.arc(cx, pinY, r, Math.PI * 0.8, Math.PI * 0.2, false);
-        ctx.lineTo(cx, pinY + 68);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = bgColor;
-        ctx.beginPath();
-        ctx.arc(cx, pinY, 14, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // 5. Blood Drop Icon
-      function drawBloodDropIcon(ctx, cx, cy) {
-        ctx.save();
-        ctx.fillStyle = iconColor;
-        const dropW = 76;
-        const dropH = 92;
-        const topY = cy - dropH * 0.48;
-        const bottomY = cy + dropH * 0.48;
-        const waistY = cy + dropH * 0.12;
-
-        ctx.beginPath();
-        ctx.moveTo(cx, topY);
-        ctx.bezierCurveTo(
-          cx + dropW * 0.50, waistY - dropH * 0.15,
-          cx + dropW * 0.52, bottomY,
-          cx, bottomY
-        );
-        ctx.bezierCurveTo(
-          cx - dropW * 0.52, bottomY,
-          cx - dropW * 0.50, waistY - dropH * 0.15,
-          cx, topY
-        );
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // Draw all 5 vector icons
-      drawPersonIcon(bCtx, iconCx, 1247);
-      drawBriefcaseIcon(bCtx, iconCx, 1425);
-      drawBuildingIcon(bCtx, iconCx, 1636);
-      drawPinIcon(bCtx, iconCx, 1866);
-      drawBloodDropIcon(bCtx, iconCx, 2050);
-
-      // Configure Text Rendering with Exact Font, Weight and Color
-      bCtx.fillStyle = textColor;
-      bCtx.font = '600 90px "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      bCtx.textAlign = 'left';
-      bCtx.textBaseline = 'alphabetic';
-
-      // Row 1: Aleena R
-      bCtx.fillText('Aleena R', textStartX, 1276);
-
-      // Row 2: HR Intern
-      bCtx.fillText('HR Intern', textStartX, 1450);
-
-      // Row 3: S & O Maritime Services / Private Limited
-      bCtx.fillText('S & O Maritime Services', textStartX, 1600);
-      bCtx.fillText('Private Limited', textStartX, 1690);
-
-      // Row 4: Pulinchode, Aluva
-      bCtx.fillText('Pulinchode, Aluva', textStartX, 1901);
-
-      // Row 5: O+
-      bCtx.fillText('O+', textStartX, 2085);
-
-      cardBackTexture.needsUpdate = true;
-    }
-
-    function redrawAll() {
-      drawExactCard();
-      drawExactCardBack();
-    }
-
-    frontBaseImg.onload = redrawAll;
-    backBaseImg.onload = redrawAll;
-
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(drawExactCardBack);
-    }
-
-    if (frontBaseImg.complete) drawExactCard();
-    if (backBaseImg.complete) drawExactCardBack();
-
-    // 6. Direct High-Clarity Card Mesh with Realistic 3D Thickness
+    // Direct High-Clarity Card Mesh with Smooth Rounded ID Corners & Acrylic Finish
     const cardWidth = 1.62;
-    const cardHeight = 2.43;
+    const cardHeight = 2.65;
     const cardThickness = 0.034;
+    const cardRadius = 0.135; // Semi-round, generous natural border radius (~8.3% of width)
 
     const cardGroup = new THREE.Group();
 
-    // Front, Back, and Edge Materials for True 3D Realism
+    // Front, Back, and Polished Acrylic Edge Materials
     const frontMat = new THREE.MeshPhysicalMaterial({
       map: cardTexture,
-      roughness: 0.15,
-      metalness: 0.05,
-      clearcoat: 0.85,
-      clearcoatRoughness: 0.06
+      roughness: 0.12,
+      metalness: 0.02,
+      clearcoat: 0.95,
+      clearcoatRoughness: 0.05,
+      ior: 1.49
     });
 
     const backMat = new THREE.MeshPhysicalMaterial({
       map: cardBackTexture,
-      roughness: 0.35,
-      metalness: 0.05,
-      clearcoat: 0.45,
-      clearcoatRoughness: 0.12
+      roughness: 0.12,
+      metalness: 0.02,
+      clearcoat: 0.95,
+      clearcoatRoughness: 0.05,
+      ior: 1.49
     });
 
-    const edgeMat = new THREE.MeshStandardMaterial({
-      color: 0x0a0c12,
-      roughness: 0.35,
-      metalness: 0.1
-    });
-
-    const cardGeo = new THREE.BoxGeometry(cardWidth, cardHeight, cardThickness);
-    const cardMesh = new THREE.Mesh(cardGeo, [
-      edgeMat,  // +x right edge
-      edgeMat,  // -x left edge
-      edgeMat,  // +y top edge
-      edgeMat,  // -y bottom edge
-      frontMat, // +z front face
-      backMat   // -z back face
-    ]);
-    cardGroup.add(cardMesh);
-
-    // Sleek Acrylic Border Frame (Frames edges and extends above for clip slot, without occluding the card front)
-    const frameWidth = cardWidth + 0.10;
-    const frameHeight = cardHeight + 0.24;
-    const frameThickness = cardThickness + 0.018;
-
-    const frameGeo = new THREE.BoxGeometry(frameWidth, frameHeight, frameThickness);
-    const frameMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      roughness: 0.08,
-      metalness: 0.05,
-      transparent: true,
-      opacity: 0.10,
-      depthWrite: false,
+    const edgeMat = new THREE.MeshPhysicalMaterial({
+      color: isInitialDark ? 0x181522 : 0xfbf8f4,
+      roughness: isInitialDark ? 0.18 : 0.14,
+      metalness: 0.02,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.04
+      clearcoatRoughness: 0.04,
+      ior: 1.49
     });
-    const frameMesh = new THREE.Mesh(frameGeo, frameMat);
-    frameMesh.position.set(0, 0.06, 0);
-    cardGroup.add(frameMesh);
 
-    // Slot Punch-Hole Mesh at Top of Acrylic Tab
-    const slotGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.07, 16);
-    slotGeo.rotateZ(Math.PI / 2);
-    const slotMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.7 });
-    const slotMesh = new THREE.Mesh(slotGeo, slotMat);
-    slotMesh.position.set(0, cardHeight / 2 + 0.11, 0);
+    // Asset Loading: Portrait Image for Authentic Badge Photo
+    let activeTheme = theme || 'dark';
+    const photoImg = new Image();
+    photoImg.crossOrigin = 'anonymous';
+    photoImg.src = `${import.meta.env.BASE_URL}assets/images/aleena-tag-photo-original.png`;
+    photoImg.onload = () => {
+      const visualTheme = activeTheme === 'dark' ? 'light' : 'dark';
+      renderCardFace(cardCanvas, visualTheme, false, photoImg);
+      cardTexture.needsUpdate = true;
+      renderCardFace(cardBackCanvas, visualTheme, true, photoImg);
+      cardBackTexture.needsUpdate = true;
+    };
+    if (photoImg.complete && photoImg.naturalWidth > 0) {
+      const visualTheme = activeTheme === 'dark' ? 'light' : 'dark';
+      renderCardFace(cardCanvas, visualTheme, false, photoImg);
+      cardTexture.needsUpdate = true;
+      renderCardFace(cardBackCanvas, visualTheme, true, photoImg);
+      cardBackTexture.needsUpdate = true;
+    }
+
+    // Master Theme Update Handler (Swapped: Dark style for Light mode, Light style for Dark mode)
+    function updateTheme(curTheme) {
+      activeTheme = curTheme;
+      const visualTheme = curTheme === 'dark' ? 'light' : 'dark';
+      const isDark = visualTheme === 'dark';
+
+      // 1. Hardware Metal & Edge Materials
+      if (isDark) {
+        metalMaterial.color.setHex(0x282a32);
+        metalMaterial.roughness = 0.28;
+        metalMaterial.metalness = 0.92;
+        metalMaterial.clearcoat = 0.35;
+        edgeMat.color.setHex(0x181522);
+        edgeMat.roughness = 0.18;
+        frontMat.roughness = 0.12;
+        frontMat.clearcoat = 0.95;
+        backMat.roughness = 0.12;
+        backMat.clearcoat = 0.95;
+      } else {
+        metalMaterial.color.setHex(0xd8dae2);
+        metalMaterial.roughness = 0.25;
+        metalMaterial.metalness = 0.88;
+        metalMaterial.clearcoat = 0.50;
+        edgeMat.color.setHex(0xf5ede4);
+        edgeMat.roughness = 0.16;
+        frontMat.roughness = 0.20;
+        frontMat.clearcoat = 0.50;
+        backMat.roughness = 0.20;
+        backMat.clearcoat = 0.50;
+      }
+      metalMaterial.needsUpdate = true;
+      edgeMat.needsUpdate = true;
+      frontMat.needsUpdate = true;
+      backMat.needsUpdate = true;
+
+      // 2. Strap Textures
+      renderLanyardStrap(strapCanvas, visualTheme);
+      strapTexture.needsUpdate = true;
+      renderLanyardStrap(strapBackCanvas, visualTheme);
+      strapBackTexture.needsUpdate = true;
+
+      // 3. Safety Buckle Collar Texture
+      renderCollar(collarCanvas, visualTheme);
+      collarTexture.needsUpdate = true;
+
+      // 4. ID Card Front and Back Textures
+      renderCardFace(cardCanvas, visualTheme, false, photoImg);
+      cardTexture.needsUpdate = true;
+      renderCardFace(cardBackCanvas, visualTheme, true, photoImg);
+      cardBackTexture.needsUpdate = true;
+    }
+
+    themeUpdateHandlerRef.current = updateTheme;
+    updateTheme(activeTheme);
+
+    if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        if (themeUpdateHandlerRef.current) {
+          themeUpdateHandlerRef.current(activeTheme);
+        }
+      });
+    }
+
+    // Create 2D Rounded Rectangle Shape with Punched Slot Hole
+    function createRoundedCardShape(w, h, r) {
+      const shape = new THREE.Shape();
+      const x = -w / 2;
+      const y = -h / 2;
+      shape.moveTo(x + r, y);
+      shape.lineTo(x + w - r, y);
+      shape.absarc(x + w - r, y + r, r, -Math.PI / 2, 0, false);
+      shape.lineTo(x + w, y + h - r);
+      shape.absarc(x + w - r, y + h - r, r, 0, Math.PI / 2, false);
+      shape.lineTo(x + r, y + h);
+      shape.absarc(x + r, y + h - r, r, Math.PI / 2, Math.PI, false);
+      shape.lineTo(x, y + r);
+      shape.absarc(x + r, y + r, r, Math.PI, Math.PI * 1.5, false);
+
+      // Punched slot hole at top center of ID card
+      const hole = new THREE.Path();
+      const holeW = 0.22;
+      const holeH = 0.054;
+      const holeR = holeH / 2;
+      const hx = -holeW / 2;
+      const hy = h / 2 - 0.10 - holeH / 2;
+      hole.moveTo(hx + holeR, hy);
+      hole.lineTo(hx + holeW - holeR, hy);
+      hole.absarc(hx + holeW - holeR, hy + holeR, holeR, -Math.PI / 2, 0, false);
+      hole.lineTo(hx + holeW, hy + holeH - holeR);
+      hole.absarc(hx + holeW - holeR, hy + holeH - holeR, holeR, 0, Math.PI / 2, false);
+      hole.lineTo(hx + holeR, hy + holeH);
+      hole.absarc(hx + holeR, hy + holeH - holeR, holeR, Math.PI / 2, Math.PI, false);
+      hole.lineTo(hx, hy + holeR);
+      hole.absarc(hx + holeR, hy + holeR, holeR, Math.PI, Math.PI * 1.5, false);
+      shape.holes.push(hole);
+
+      return shape;
+    }
+
+    const cardShape = createRoundedCardShape(cardWidth, cardHeight, cardRadius);
+
+    // Front Face Mesh
+    const frontGeo = new THREE.ShapeGeometry(cardShape, 24);
+    const fPos = frontGeo.attributes.position;
+    const fUvs = [];
+    const halfW = cardWidth / 2;
+    const halfH = cardHeight / 2;
+    for (let i = 0; i < fPos.count; i++) {
+      const px = fPos.getX(i);
+      const py = fPos.getY(i);
+      fUvs.push((px + halfW) / cardWidth, (py + halfH) / cardHeight);
+    }
+    frontGeo.setAttribute('uv', new THREE.Float32BufferAttribute(fUvs, 2));
+    frontGeo.computeVertexNormals();
+
+    const frontMesh = new THREE.Mesh(frontGeo, frontMat);
+    frontMesh.position.set(0, 0, cardThickness / 2);
+    cardGroup.add(frontMesh);
+
+    // Back Face Mesh (facing -Z with aligned UVs)
+    const backGeo = new THREE.ShapeGeometry(cardShape, 24);
+    const bPos = backGeo.attributes.position;
+    const bUvs = [];
+    for (let i = 0; i < bPos.count; i++) {
+      const px = bPos.getX(i);
+      const py = bPos.getY(i);
+      bUvs.push((px + halfW) / cardWidth, (py + halfH) / cardHeight);
+    }
+    backGeo.setAttribute('uv', new THREE.Float32BufferAttribute(bUvs, 2));
+    backGeo.computeVertexNormals();
+
+    const backMesh = new THREE.Mesh(backGeo, backMat);
+    backMesh.position.set(0, 0, -cardThickness / 2);
+    backMesh.rotation.y = Math.PI;
+    cardGroup.add(backMesh);
+
+    // Beveled Polished Acrylic Rim Band Geometry
+    const shapePoints = cardShape.getPoints(24);
+    const nPts = shapePoints.length;
+    const halfT = cardThickness / 2;
+    const bevelSize = 0.004;
+
+    const edgePositions = [];
+    const edgeNormals = [];
+    const edgeUvs = [];
+    const edgeIndices = [];
+
+    for (let ring = 0; ring < 4; ring++) {
+      const z = ring === 0 ? halfT :
+                ring === 1 ? halfT - bevelSize :
+                ring === 2 ? -halfT + bevelSize :
+                -halfT;
+      const inset = (ring === 0 || ring === 3) ? 0.002 : 0;
+
+      for (let i = 0; i < nPts; i++) {
+        const pt = shapePoints[i];
+        const nextPt = shapePoints[(i + 1) % nPts];
+        const prevPt = shapePoints[(i - 1 + nPts) % nPts];
+        const tangent = new THREE.Vector2().subVectors(nextPt, prevPt).normalize();
+        const norm2D = new THREE.Vector2(-tangent.y, tangent.x).normalize();
+
+        const px = pt.x - norm2D.x * inset;
+        const py = pt.y - norm2D.y * inset;
+
+        edgePositions.push(px, py, z);
+        const nz = ring === 0 ? 0.5 : ring === 1 ? 0.1 : ring === 2 ? -0.1 : -0.5;
+        const nLen = Math.hypot(norm2D.x, norm2D.y, nz);
+        edgeNormals.push(norm2D.x / nLen, norm2D.y / nLen, nz / nLen);
+        edgeUvs.push(i / nPts, ring / 3);
+      }
+    }
+
+    for (let ring = 0; ring < 3; ring++) {
+      const baseCurrent = ring * nPts;
+      const baseNext = (ring + 1) * nPts;
+      for (let i = 0; i < nPts; i++) {
+        const iNext = (i + 1) % nPts;
+        const a = baseCurrent + i;
+        const b = baseNext + i;
+        const c = baseCurrent + iNext;
+        const d = baseNext + iNext;
+
+        edgeIndices.push(a, b, c);
+        edgeIndices.push(b, d, c);
+      }
+    }
+
+    const edgeGeo = new THREE.BufferGeometry();
+    edgeGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgePositions, 3));
+    edgeGeo.setAttribute('normal', new THREE.Float32BufferAttribute(edgeNormals, 3));
+    edgeGeo.setAttribute('uv', new THREE.Float32BufferAttribute(edgeUvs, 2));
+    edgeGeo.setIndex(edgeIndices);
+    edgeGeo.computeVertexNormals();
+
+    const edgeMesh = new THREE.Mesh(edgeGeo, edgeMat);
+    cardGroup.add(edgeMesh);
+
+    // Acrylic inner wall mesh for punched hole
+    const holePath = cardShape.holes[0];
+    const holePoints = holePath.getPoints(16);
+    const nHPts = holePoints.length;
+    const slotPositions = [];
+    const slotNormals = [];
+    const slotIndices = [];
+    for (let i = 0; i < nHPts; i++) {
+      const pt = holePoints[i];
+      slotPositions.push(pt.x, pt.y, halfT);
+      slotPositions.push(pt.x, pt.y, -halfT);
+      const nx = pt.x;
+      const ny = pt.y - (cardHeight / 2 - 0.10);
+      const len = Math.hypot(nx, ny) || 1;
+      slotNormals.push(-nx / len, -ny / len, 0);
+      slotNormals.push(-nx / len, -ny / len, 0);
+    }
+    for (let i = 0; i < nHPts; i++) {
+      const next = (i + 1) % nHPts;
+      const topCurr = i * 2;
+      const botCurr = i * 2 + 1;
+      const topNext = next * 2;
+      const botNext = next * 2 + 1;
+      slotIndices.push(topCurr, topNext, botCurr);
+      slotIndices.push(topNext, botNext, botCurr);
+    }
+    const slotGeo = new THREE.BufferGeometry();
+    slotGeo.setAttribute('position', new THREE.Float32BufferAttribute(slotPositions, 3));
+    slotGeo.setAttribute('normal', new THREE.Float32BufferAttribute(slotNormals, 3));
+    slotGeo.setIndex(slotIndices);
+    const slotMesh = new THREE.Mesh(slotGeo, edgeMat);
     cardGroup.add(slotMesh);
 
-    // 7. Master 3D Badge Assembly (Rigidly joins Card, Frame, Slot, Ring, Clip, and Buckle)
+    // 7. Master 3D Badge Assembly (Rigidly joins Card, Clamp, and Hardware)
     const badgePivot = new THREE.Group();
     cardGroup.position.set(0, 0, 0);
-    claspGroup.position.set(0, cardHeight / 2 + 0.11, 0);
+    claspGroup.position.set(0, cardHeight / 2, 0);
     badgePivot.add(cardGroup);
     badgePivot.add(claspGroup);
     scene.add(badgePivot);
@@ -909,7 +1079,7 @@ export default function Lanyard({ className = '' }) {
     const mouse = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();
     const claspAnchorPoint = new THREE.Vector3();
-    const claspAnchorLocal = new THREE.Vector3(0, 0.74, 0);
+    const claspAnchorLocal = new THREE.Vector3(0, 0.32, 0);
 
     const dragPlane = new THREE.Plane();
     const touchPoint3D = new THREE.Vector3();
@@ -951,7 +1121,7 @@ export default function Lanyard({ className = '' }) {
       if (distToCard < 0.52) return true;
 
       // Strap line segment proximity
-      claspAnchorLocal.set(0, 0.74, 0);
+      claspAnchorLocal.set(0, 0.32, 0);
       claspGroup.localToWorld(claspAnchorPoint.copy(claspAnchorLocal));
       const strapMid = new THREE.Vector3()
         .addVectors(strapTopLeft, claspAnchorPoint)
@@ -1029,7 +1199,7 @@ export default function Lanyard({ className = '' }) {
         const targetY = touchPoint3D.y + dragGrabOffset.y;
 
         // Viewport boundaries
-        const isMobile = width < 768;
+        const isMobile = (typeof window !== 'undefined' ? window.innerWidth : width) < 768;
         const limitX = isMobile ? 1.65 : 2.35;
         const limitYMin = -1.75;
         const limitYMax = 1.25;
@@ -1328,15 +1498,15 @@ export default function Lanyard({ className = '' }) {
       badgePivot.rotation.y = currentRotY + ambientSwayY;
       badgePivot.rotation.z = currentTiltZ + ambientSwayZ;
 
-      // Track exact world position where strap ribbons connect into the top of breakaway buckle
-      claspAnchorLocal.set(0, 0.74, 0);
+      // Track exact world position where strap ribbons connect into the top of fabric collar
+      claspAnchorLocal.set(0, 0.32, 0);
       claspGroup.localToWorld(claspAnchorPoint.copy(claspAnchorLocal));
 
       // Dynamic ribbon twist follows swivel rotation (untwists naturally as badge flips on swivel hook)
       const baseFaceAngle = isFlippedToBack ? Math.PI : 0;
       const ribbonTwist = (badgePivot.rotation.y - baseFaceAngle) * 0.65;
-      updateStrapRibbon(leftStrapGeo, strapTopLeft, claspAnchorPoint, 0.16, 0.0, ribbonTwist);
-      updateStrapRibbon(rightStrapGeo, strapTopRight, claspAnchorPoint, 0.16, 0.0, ribbonTwist);
+      updateStrapRibbon(leftStrapGeo, strapTopLeft, claspAnchorPoint, 0.17, 0.0, ribbonTwist);
+      updateStrapRibbon(rightStrapGeo, strapTopRight, claspAnchorPoint, 0.17, 0.0, ribbonTwist);
 
       renderer.render(scene, camera);
     }
@@ -1399,17 +1569,15 @@ export default function Lanyard({ className = '' }) {
       if (isListenerAttached) {
         window.removeEventListener('deviceorientation', handleOrientation);
       }
+      themeUpdateHandlerRef.current = null;
       renderer.dispose();
       strapMaterial.dispose();
       strapMaterialBack.dispose();
-      whiteTabMaterial.dispose();
-      plasticMaterial.dispose();
-      plasticAccentMaterial.dispose();
+      collarMaterial.dispose();
       metalMaterial.dispose();
       strapTexture.dispose();
       strapBackTexture.dispose();
-      whiteTabTexture.dispose();
-      chevronGeo.dispose();
+      collarTexture.dispose();
       leftStrapGeo.dispose();
       rightStrapGeo.dispose();
       frontMat.dispose();
@@ -1417,11 +1585,11 @@ export default function Lanyard({ className = '' }) {
       edgeMat.dispose();
       cardTexture.dispose();
       cardBackTexture.dispose();
-      frameMat.dispose();
-      cardGeo.dispose();
-      frameGeo.dispose();
+      frontGeo.dispose();
+      backGeo.dispose();
+      edgeGeo.dispose();
       slotGeo.dispose();
-      slotMat.dispose();
+      hookGeo.dispose();
     };
   }, []);
 

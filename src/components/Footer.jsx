@@ -1,26 +1,7 @@
 import React, { useState } from 'react';
-import { ArrowUp, Instagram, Linkedin, Mail, X, ChevronRight, Sparkles } from 'lucide-react';
+import { ArrowUp, Linkedin, Mail, X, ChevronRight, Sparkles } from 'lucide-react';
 import { personalInfo } from '../data/portfolioData';
 import MagicTreeQR from './MagicTreeQR';
-
-function TelegramIcon({ size = 18, className = '' }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M21.5 2.5L2 11.25l7.5 3.25L12 21.5l3.75-4.5 5.75 4.5L21.5 2.5z" />
-      <path d="M9.5 14.5L16 8.5" />
-    </svg>
-  );
-}
 
 export default function Footer() {
   const [activeModal, setActiveModal] = useState(null);
@@ -55,20 +36,6 @@ export default function Footer() {
             {/* Circular Social Links with Labels */}
             <div className="footer-social-row" aria-label="Social media links">
               <a
-                href={personalInfo.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-pill-group"
-                aria-label="Instagram Profile"
-                title="Instagram: @aleena.rosu.raju"
-              >
-                <div className="social-circle-btn">
-                  <Instagram size={19} />
-                </div>
-                <span className="social-pill-label">Instagram</span>
-              </a>
-
-              <a
                 href={personalInfo.linkedIn}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -92,20 +59,6 @@ export default function Footer() {
                   <Mail size={19} />
                 </div>
                 <span className="social-pill-label">Email</span>
-              </a>
-
-              <a
-                href={personalInfo.telegram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-pill-group"
-                aria-label="Telegram Profile @Aleenaraju"
-                title="Telegram: @Aleenaraju"
-              >
-                <div className="social-circle-btn">
-                  <TelegramIcon size={19} />
-                </div>
-                <span className="social-pill-label">Telegram</span>
               </a>
             </div>
           </div>
@@ -181,7 +134,7 @@ export default function Footer() {
               <h5 className="footer-qr-title">Quick Access</h5>
               <p className="footer-qr-desc">Scan to open my portfolio</p>
               
-              <MagicTreeQR />
+              <MagicTreeQR url="https://aleenar.in/" />
             </div>
           </div>
 
@@ -318,20 +271,22 @@ export default function Footer() {
         
         .editorial-footer {
           position: relative;
-          background: #06121F;
-          color: #FFFFFF;
+          background: rgba(11, 7, 19, 0.90);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          color: #FAF7FC;
           padding-top: 5rem;
           padding-bottom: 2.25rem;
           overflow: hidden;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          border-top: 1px solid var(--border-subtle);
           transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
         }
 
-        /* Light Theme: Premium Warm Ivory Background (#FAF8F3) */
+        /* Light Theme: Premium Warm Ivory Glass Background */
         [data-theme="light"] .editorial-footer {
-          background: #FAF8F3;
-          color: #0B2B48;
-          border-top: 1px solid rgba(11, 43, 72, 0.08);
+          background: rgba(253, 249, 247, 0.90);
+          color: #1F122B;
+          border-top: 1px solid var(--border-subtle);
         }
 
         .footer-wrapper {
@@ -376,11 +331,11 @@ export default function Footer() {
             bottom: 6px;
             right: 0;
             width: 1px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(192, 132, 252, 0.14);
           }
 
           [data-theme="light"] .footer-col-left::after {
-            background: rgba(11, 43, 72, 0.08);
+            background: rgba(126, 34, 206, 0.12);
           }
         }
 
@@ -407,7 +362,7 @@ export default function Footer() {
         }
 
         [data-theme="light"] .footer-headline {
-          color: #0B2B48;
+          color: #1F122B;
         }
 
         .headline-accent {
@@ -421,13 +376,13 @@ export default function Footer() {
           font-family: var(--font-sans);
           font-size: 0.96rem;
           line-height: 1.65;
-          color: #A7B8C7;
+          color: #C9BFD8;
           max-width: 440px;
           margin: 0 0 24px 0;
         }
 
         [data-theme="light"] .footer-supporting-text {
-          color: #617386;
+          color: #5A476C;
         }
 
         /* Circular Social Links with Labels: 10px gap between circle and label (8-12px range) */
@@ -715,13 +670,13 @@ export default function Footer() {
         .portrait-container {
           position: relative;
           width: 100%;
-          max-width: 320px;
+          max-width: 370px;
           display: flex;
           flex-direction: column;
           align-items: center;
         }
 
-        /* Ambient Glow behind portrait */
+        /* Ambient Glow behind portrait (CSS radial gradient, zero blur cost) */
         .portrait-ambient-glow {
           position: absolute;
           top: 15%;
@@ -729,14 +684,13 @@ export default function Footer() {
           width: 220px;
           height: 220px;
           border-radius: 50%;
-          background: radial-gradient(circle at 50% 50%, rgba(242, 140, 24, 0.22) 0%, rgba(13, 43, 77, 0.35) 60%, transparent 80%);
-          filter: blur(28px);
+          background: radial-gradient(circle at 50% 50%, rgba(242, 140, 24, 0.22) 0%, rgba(13, 43, 77, 0.25) 50%, transparent 75%);
           pointer-events: none;
           z-index: 1;
         }
 
         [data-theme="light"] .portrait-ambient-glow {
-          background: radial-gradient(circle at 50% 50%, rgba(233, 162, 74, 0.22) 0%, rgba(175, 199, 216, 0.35) 60%, transparent 80%);
+          background: radial-gradient(circle at 50% 50%, rgba(192, 132, 252, 0.25) 0%, rgba(233, 213, 255, 0.15) 50%, transparent 75%);
         }
 
         /* Decorative curved orbit SVG */
@@ -755,13 +709,11 @@ export default function Footer() {
           position: relative;
           z-index: 3;
           width: 100%;
-          max-width: 280px;
+          max-width: 335px;
           height: auto;
           display: block;
           user-select: none;
           pointer-events: none;
-          -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
-          mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
         }
 
         /* Signature & Designation */
@@ -770,10 +722,12 @@ export default function Footer() {
           z-index: 4;
           display: flex;
           flex-direction: column;
-          align-items: flex-end;
+          align-items: center;
           align-self: flex-end;
-          margin-top: -3.2rem;
+          margin-top: 0.25rem;
+          margin-right: -0.75rem;
           padding-right: 0.5rem;
+          overflow: visible;
         }
 
         .footer-script-signature {
@@ -785,7 +739,21 @@ export default function Footer() {
           margin: 0;
           transform: rotate(-3deg);
           letter-spacing: 0.02em;
-          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+          text-shadow: 0 2px 10px rgba(4, 13, 26, 0.75), 0 0 1px rgba(4, 13, 26, 0.9);
+          display: inline-block;
+          padding: 0.08em 0.55em 0.12em 0;
+          margin-right: -0.55em;
+          overflow: visible;
+        }
+
+        [data-theme="light"] .footer-script-signature {
+          background: linear-gradient(135deg, #7C3AED 0%, #C084FC 70%, #E9D5FF 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: #7C3AED;
+          text-shadow: none;
+          filter: drop-shadow(0 2px 8px rgba(124, 58, 237, 0.20));
         }
 
         .footer-signature-role {
@@ -794,12 +762,12 @@ export default function Footer() {
           font-weight: 700;
           letter-spacing: 0.22em;
           color: #FFFFFF;
-          margin-top: 0.35rem;
+          margin-top: 0.45rem;
           text-transform: uppercase;
         }
 
         [data-theme="light"] .footer-signature-role {
-          color: #0B2B48;
+          color: #5A476C;
         }
 
         /* Center Sparkle Horizontal Divider */
@@ -825,11 +793,11 @@ export default function Footer() {
         }
 
         [data-theme="light"] .divider-line.left {
-          background: linear-gradient(90deg, transparent 0%, rgba(233, 162, 74, 0.45) 100%);
+          background: linear-gradient(90deg, transparent 0%, rgba(124, 58, 237, 0.35) 100%);
         }
 
         [data-theme="light"] .divider-line.right {
-          background: linear-gradient(90deg, rgba(233, 162, 74, 0.45) 0%, transparent 100%);
+          background: linear-gradient(90deg, rgba(124, 58, 237, 0.35) 0%, transparent 100%);
         }
 
         .divider-sparkle {
@@ -837,7 +805,6 @@ export default function Footer() {
           display: flex;
           align-items: center;
           justify-content: center;
-          filter: drop-shadow(0 0 6px var(--accent-gold-glow));
         }
 
         /* Bottom Bar: Same horizontal baseline on desktop */
@@ -877,7 +844,7 @@ export default function Footer() {
         }
 
         [data-theme="light"] .footer-monogram-circle {
-          color: #0B2B48;
+          color: #1F122B;
         }
 
         .footer-brand-divider {
@@ -888,7 +855,7 @@ export default function Footer() {
         }
 
         [data-theme="light"] .footer-brand-divider {
-          background: rgba(11, 43, 72, 0.15);
+          background: rgba(124, 58, 237, 0.18);
         }
 
         .footer-brand-text {
@@ -906,7 +873,7 @@ export default function Footer() {
         }
 
         [data-theme="light"] .footer-brand-name {
-          color: #0B2B48;
+          color: #1F122B;
         }
 
         .footer-brand-subtitle {
@@ -918,7 +885,7 @@ export default function Footer() {
         }
 
         [data-theme="light"] .footer-brand-subtitle {
-          color: #617386;
+          color: #5A476C;
         }
 
         .copyright-text {
@@ -930,7 +897,7 @@ export default function Footer() {
         }
 
         [data-theme="light"] .copyright-text {
-          color: #617386;
+          color: #5A476C;
         }
 
         /* Elegant Orange Outlined Back-to-Top Button */
@@ -975,8 +942,8 @@ export default function Footer() {
           width: 100%;
           max-width: 520px;
           background: var(--bg-card);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           border: 1px solid var(--border-gold);
           border-radius: 14px;
           padding: 2rem;
@@ -1098,14 +1065,16 @@ export default function Footer() {
           }
 
           .portrait-container {
-            max-width: 290px;
+            max-width: 335px;
           }
 
           .footer-portrait-meta {
             align-self: center;
             align-items: center;
-            padding-right: 0;
-            margin-top: -2.4rem;
+            padding-right: 0.5rem;
+            margin-right: 0;
+            margin-top: 0.35rem;
+            overflow: visible;
           }
         }
 

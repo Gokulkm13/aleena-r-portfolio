@@ -23,15 +23,21 @@ export default function BrandWordmark() {
           role="img"
         >
           <defs>
+            {/* Light Theme: Sophisticated Lavender-Purple Gradient */}
+            <linearGradient id="sigWordmarkGradLight" x1="0%" y1="0%" x2="100%" y2="50%">
+              <stop offset="0%" stopColor="#7C3AED" />
+              <stop offset="65%" stopColor="#C084FC" />
+              <stop offset="100%" stopColor="#E9D5FF" />
+            </linearGradient>
             <linearGradient id="sigAccentGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#082B4C" stopOpacity="0.5" />
-              <stop offset="25%" stopColor="#E9A24A" />
-              <stop offset="100%" stopColor="#F28C18" />
+              <stop offset="0%" stopColor="#7C3AED" />
+              <stop offset="50%" stopColor="#C084FC" />
+              <stop offset="100%" stopColor="#E9D5FF" />
             </linearGradient>
             <linearGradient id="sigAccentGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#F8FAFC" stopOpacity="0.4" />
-              <stop offset="25%" stopColor="#F28C18" />
-              <stop offset="100%" stopColor="#E9A24A" />
+              <stop offset="0%" stopColor="#FAF7FC" stopOpacity="0.4" />
+              <stop offset="35%" stopColor="#C084FC" />
+              <stop offset="100%" stopColor="#A855F7" />
             </linearGradient>
           </defs>
           <path className="sig-path-main" d={mainPath} />
@@ -78,17 +84,19 @@ export default function BrandWordmark() {
 
         /* Light / Dark Mode Color Rules */
         [data-theme="light"] .sig-path-main {
-          fill: #082B4C;
+          fill: url(#sigWordmarkGradLight);
+          filter: drop-shadow(0 2px 8px rgba(124, 58, 237, 0.18));
           transition: fill 500ms ease-in-out;
         }
 
         [data-theme="light"] .sig-path-accent {
           fill: url(#sigAccentGradLight);
+          filter: drop-shadow(0 2px 6px rgba(192, 132, 252, 0.22));
           transition: fill 500ms ease-in-out;
         }
 
         [data-theme="dark"] .sig-path-main {
-          fill: #F8FAFC;
+          fill: #FAF7FC;
           transition: fill 500ms ease-in-out;
         }
 
@@ -106,11 +114,11 @@ export default function BrandWordmark() {
         }
 
         [data-theme="light"] .brand-divider {
-          background: rgba(8, 43, 76, 0.22);
+          background: rgba(31, 18, 43, 0.22);
         }
 
         [data-theme="dark"] .brand-divider {
-          background: rgba(148, 163, 184, 0.35);
+          background: rgba(192, 132, 252, 0.28);
         }
 
         /* Tagline: PSYCHOLOGY | HR */
@@ -130,11 +138,11 @@ export default function BrandWordmark() {
         }
 
         [data-theme="light"] .brand-tagline {
-          color: #4A607A;
+          color: #5A476C;
         }
 
         [data-theme="dark"] .brand-tagline {
-          color: #94A3B8;
+          color: #C9BFD8;
         }
 
         .tag-sep {

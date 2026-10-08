@@ -1,25 +1,6 @@
 import React from 'react';
-import { Mail, Linkedin, Instagram, ArrowUpRight } from 'lucide-react';
+import { Mail, Linkedin, ArrowUpRight } from 'lucide-react';
 import { personalInfo } from '../data/portfolioData';
-
-function TelegramIcon({ size = 24, className = '' }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M21.5 2.5L2 11.25l7.5 3.25L12 21.5l3.75-4.5 5.75 4.5L21.5 2.5z" />
-      <path d="M9.5 14.5L16 8.5" />
-    </svg>
-  );
-}
 
 export default function Contact() {
   return (
@@ -71,42 +52,6 @@ export default function Contact() {
               <ArrowUpRight size={20} className="channel-arrow" />
             </a>
 
-            {/* Instagram Channel */}
-            <a
-              href={personalInfo.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="channel-card"
-              aria-label="Follow me on Instagram"
-            >
-              <div className="channel-icon-wrap">
-                <Instagram size={24} className="channel-icon" />
-              </div>
-              <div className="channel-info">
-                <span className="channel-type">INSTAGRAM</span>
-                <span className="channel-val">@aleena.rosu.raju</span>
-              </div>
-              <ArrowUpRight size={20} className="channel-arrow" />
-            </a>
-
-            {/* Telegram Channel */}
-            <a
-              href={personalInfo.telegram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="channel-card"
-              aria-label="Message me on Telegram"
-            >
-              <div className="channel-icon-wrap">
-                <TelegramIcon size={24} className="channel-icon" />
-              </div>
-              <div className="channel-info">
-                <span className="channel-type">TELEGRAM</span>
-                <span className="channel-val">@Aleenaraju</span>
-              </div>
-              <ArrowUpRight size={20} className="channel-arrow" />
-            </a>
-
           </div>
         </div>
 
@@ -114,15 +59,16 @@ export default function Contact() {
 
       <style>{`
         .contact-section {
-          background-color: var(--bg-primary);
+          background-color: transparent;
           padding-bottom: 5rem;
         }
         .contact-box {
           padding: 4rem 2.5rem;
           border: 1px solid var(--border-gold);
+          border-radius: 20px;
           background: var(--bg-card);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           box-shadow: var(--shadow-card);
         }
         @media (min-width: 768px) {
@@ -152,17 +98,14 @@ export default function Contact() {
           display: grid;
           grid-template-columns: 1fr;
           gap: 1.25rem;
-          max-width: 1080px;
+          max-width: 720px;
           margin: 0 auto;
+          width: 100%;
         }
         @media (min-width: 640px) {
           .contact-channels {
             grid-template-columns: repeat(2, 1fr);
-          }
-        }
-        @media (min-width: 1024px) {
-          .contact-channels {
-            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
           }
         }
         .channel-card {

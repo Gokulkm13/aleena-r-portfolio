@@ -81,11 +81,13 @@ export default function Hero() {
             </span>
           </div>
 
-          {/* ALEENA R on a Single Straight Line */}
-          <h1 className="hero-name">
-            <span className="name-primary">ALEENA</span>
-            <span className="name-accent">R</span>
-          </h1>
+          {/* Bold Modern Geometric Wordmark Heading: ALEENA R */}
+          <div className="hero-wordmark-wrap">
+            <h1 className="hero-name hero-bold-modern" aria-label="ALEENA R">
+              <span className="wordmark-aleena">ALEENA</span>
+              <span className="wordmark-r">R</span>
+            </h1>
+          </div>
 
           {/* Role Subtitle & Maritime Company Name */}
           <p className="hero-role">{personalInfo.role}</p>
@@ -198,7 +200,7 @@ export default function Hero() {
           padding-bottom: calc(clamp(65px, 8vw, 105px) + 52px);
           box-sizing: border-box;
           overflow: hidden;
-          background: var(--bg-primary);
+          background: transparent;
           transition: background-color 500ms ease-in-out;
         }
 
@@ -225,9 +227,13 @@ export default function Hero() {
           z-index: 10;
         }
 
+
+
         /* 1. Eyebrow -> heading: 18px (reduced from 24px) */
         .hero-tag-wrap {
           margin-bottom: 18px;
+          position: relative;
+          z-index: 10;
         }
 
         .hero-category-tag {
@@ -241,50 +247,108 @@ export default function Hero() {
         }
 
         [data-theme="light"] .hero-category-tag {
-          color: #E9A24A;
+          color: #7E22CE;
         }
 
         [data-theme="dark"] .hero-category-tag {
-          color: #F28C18;
+          color: #C084FC;
         }
 
         .hero-category-hr {
           white-space: nowrap;
         }
 
-        /* 2. Heading -> role: 14px (reduced from 18px) */
-        .hero-name {
-          font-family: var(--font-editorial);
-          font-size: clamp(72px, 5.4vw, 84px);
-          font-weight: 800;
-          letter-spacing: -0.015em;
-          line-height: 1.05;
-          margin: 0 0 14px 0;
-          display: flex;
+        /* 2. Modern Luxury Editorial Wordmark Container */
+        .hero-wordmark-wrap,
+        .hero-signature-wrap {
+          position: relative;
+          display: inline-flex;
           align-items: center;
-          gap: clamp(0.35rem, 0.8vw, 0.65rem);
-          white-space: nowrap; /* CRITICAL: Never wraps on desktop */
+          width: fit-content;
+          max-width: 100%;
+          margin: 0 0 14px 0;
+          z-index: 5;
+        }
+
+        /* Bold Modern Geometric Wordmark: ALEENA R */
+        .hero-name.hero-bold-modern,
+        .hero-name.hero-editorial-wordmark,
+        .hero-name.hero-signature-heading {
+          font-family: 'Montserrat', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+          font-size: clamp(52px, 4.4vw, 68px);
+          font-weight: 850;
+          line-height: 1;
+          letter-spacing: -0.02em;
+          margin: 0;
+          padding: 0;
+          display: inline-flex;
+          align-items: baseline;
+          gap: clamp(0.32rem, 0.75vw, 0.55rem);
+          position: relative;
+          z-index: 1;
+          user-select: none;
+          white-space: nowrap;
           text-transform: uppercase;
+          background: transparent;
+          border: none;
+          box-shadow: none;
+          backdrop-filter: none;
+          -webkit-backdrop-filter: none;
         }
 
-        [data-theme="light"] .name-primary {
-          color: #082B4C; /* navy in light mode */
-          transition: color 500ms ease-in-out;
+        .wordmark-aleena,
+        .editorial-aleena {
+          font-family: inherit;
+          font-weight: inherit;
+          letter-spacing: inherit;
+          display: inline-block;
+          transition: color 500ms ease-in-out, text-shadow 500ms ease-in-out;
         }
 
-        [data-theme="dark"] .name-primary {
-          color: #FFFFFF; /* white in dark mode */
-          transition: color 500ms ease-in-out;
+        .wordmark-r,
+        .editorial-r-wrap,
+        .editorial-r-char {
+          font-family: inherit;
+          font-weight: inherit;
+          letter-spacing: inherit;
+          display: inline-block;
+          transition: color 500ms ease-in-out, text-shadow 500ms ease-in-out;
         }
 
-        [data-theme="light"] .name-accent {
-          color: #E9A24A; /* "R" remains orange */
-          transition: color 500ms ease-in-out;
+        /* DARK THEME STYLING:
+           ALEENA: soft white / ivory (#FAF8F5)
+           R: vivid lavender / purple (#C084FC) with very subtle luminous glow
+           NO gold, orange, or yellow. */
+        [data-theme="dark"] .wordmark-aleena,
+        [data-theme="dark"] .editorial-aleena {
+          color: #FAF8F5;
+          text-shadow: 0 0 24px rgba(255, 255, 255, 0.10);
         }
 
-        [data-theme="dark"] .name-accent {
-          color: #F28C18; /* "R" remains orange */
-          transition: color 500ms ease-in-out;
+        [data-theme="dark"] .wordmark-r,
+        [data-theme="dark"] .editorial-r-wrap,
+        [data-theme="dark"] .editorial-r-char {
+          color: #C084FC;
+          text-shadow: 0 0 20px rgba(192, 132, 252, 0.45), 0 0 35px rgba(168, 85, 247, 0.25);
+          filter: drop-shadow(0 0 12px rgba(192, 132, 252, 0.35));
+        }
+
+        /* LIGHT THEME STYLING:
+           ALEENA: deep navy / plum (#1E122C)
+           R: rich purple / lavender (#7E22CE)
+           NO gold, orange, or yellow. */
+        [data-theme="light"] .wordmark-aleena,
+        [data-theme="light"] .editorial-aleena {
+          color: #1E122C;
+          text-shadow: none;
+        }
+
+        [data-theme="light"] .wordmark-r,
+        [data-theme="light"] .editorial-r-wrap,
+        [data-theme="light"] .editorial-r-char {
+          color: #7E22CE;
+          text-shadow: 0 2px 10px rgba(126, 34, 206, 0.18);
+          filter: drop-shadow(0 2px 6px rgba(126, 34, 206, 0.15));
         }
 
         /* 3. Role -> company: 11px (reduced from 14px) */
@@ -299,11 +363,11 @@ export default function Hero() {
         }
 
         [data-theme="light"] .hero-role {
-          color: #E9A24A;
+          color: #7E22CE;
         }
 
         [data-theme="dark"] .hero-role {
-          color: #F28C18;
+          color: #C084FC;
         }
 
         /* 4. Company -> website: 11px (reduced from 14px) */
@@ -469,9 +533,11 @@ export default function Hero() {
           .hero-category-tag {
             font-size: 14px;
           }
-          .hero-name {
-            font-size: clamp(62px, 4.8vw, 74px);
-            margin-bottom: 10px;
+          .hero-signature-wrap {
+            margin-bottom: 12px;
+          }
+          .hero-name.hero-signature-heading {
+            font-size: clamp(58px, 5vw, 72px);
           }
           .hero-role {
             font-size: 28px;
@@ -555,9 +621,19 @@ export default function Hero() {
           .hero-category-tag {
             font-size: 14px;
           }
-          .hero-name {
-            font-size: clamp(52px, 7vw, 68px);
+          .hero-wordmark-wrap,
+          .hero-signature-wrap {
+            margin-bottom: 12px;
+          }
+          .hero-name.hero-bold-modern,
+          .hero-name.hero-editorial-wordmark,
+          .hero-name.hero-signature-heading {
+            font-size: clamp(44px, 5.8vw, 56px);
             white-space: nowrap;
+          }
+          .wordmark-aleena,
+          .editorial-aleena {
+            letter-spacing: -0.02em;
           }
           .hero-role {
             font-size: clamp(26px, 3.5vw, 32px);
@@ -578,9 +654,10 @@ export default function Hero() {
         @media (max-width: 767px) {
           .hero-section {
             min-height: auto;
+            position: relative;
             display: block;
-            /* Header bottom -> Psychology: 32px (Header height = 70px) */
-            padding-top: calc(70px + 32px);
+            /* Lanyard hangs seamlessly directly beneath the fixed 70px navigation bar (no gap) */
+            padding-top: 68px;
             /* 40px clean empty gap above the 60px wave on mobile */
             padding-bottom: calc(60px + 40px);
             width: 100%;
@@ -647,23 +724,34 @@ export default function Hero() {
             white-space: nowrap;
           }
 
-          /* ALEENA R: responsive sizing clamp(36px, 9.8vw, 44px), letter-spacing -0.035em, strictly fits */
-          /* ALEENA R -> HR Intern: 16px (reduced from 22px) */
-          .hero-name {
-            font-family: var(--font-editorial);
-            font-size: clamp(36px, 9.8vw, 44px);
-            font-weight: 800;
-            line-height: 1;
-            letter-spacing: -0.035em;
+          .hero-wordmark-wrap,
+          .hero-signature-wrap {
+            width: fit-content;
+            max-width: 100%;
             margin-bottom: 16px;
-            white-space: nowrap; /* strictly one line */
+          }
+
+          /* Bold Modern Wordmark: responsive fluid geometric strictly fitting on one line */
+          .hero-name.hero-bold-modern,
+          .hero-name.hero-editorial-wordmark,
+          .hero-name.hero-signature-heading {
+            font-size: clamp(34px, 8.4vw, 44px);
+            line-height: 1;
+            letter-spacing: -0.025em;
+            gap: 0.28em;
+            margin: 0;
+            white-space: nowrap;
             display: inline-flex;
             align-items: baseline;
-            gap: 0.22em;
-            width: 100%;
+            width: auto;
             max-width: 100%;
             box-sizing: border-box;
             padding: 0;
+          }
+
+          .wordmark-aleena,
+          .editorial-aleena {
+            letter-spacing: -0.025em;
           }
 
           /* HR Intern: 30–32px, line-height 1.1 */
@@ -782,9 +870,17 @@ export default function Hero() {
             padding-left: 24px;
             padding-right: 24px;
           }
-          .hero-name {
-            font-size: clamp(34px, 9.4vw, 38px);
-            letter-spacing: -0.035em;
+          .hero-name.hero-bold-modern,
+          .hero-name.hero-editorial-wordmark,
+          .hero-name.hero-signature-heading {
+            font-size: clamp(28px, 7.8vw, 34px);
+            letter-spacing: -0.03em;
+            gap: 0.25em;
+            padding: 0;
+          }
+          .wordmark-aleena,
+          .editorial-aleena {
+            letter-spacing: -0.03em;
           }
           .hero-role {
             font-size: 28px;

@@ -76,15 +76,15 @@ export default function ThemeToggle({ className = '', compact = false }) {
         .slider-light {
           transform: translateX(0);
           background: #FFFFFF;
-          border: 1px solid rgba(8, 43, 76, 0.12);
-          box-shadow: 0 2px 8px rgba(8, 43, 76, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+          border: 1px solid rgba(126, 34, 206, 0.12);
+          box-shadow: 0 2px 8px rgba(126, 34, 206, 0.10), 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .slider-dark {
           transform: translateX(calc(100%));
-          background: #0D2B4D;
-          border: 1px solid rgba(242, 140, 24, 0.4);
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5), 0 0 12px rgba(242, 140, 24, 0.2);
+          background: linear-gradient(135deg, #A855F7 0%, #7E22CE 100%);
+          border: 1px solid rgba(192, 132, 252, 0.45);
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5), 0 0 14px rgba(168, 85, 247, 0.35);
         }
 
         .theme-toggle-btn {
@@ -115,12 +115,12 @@ export default function ThemeToggle({ className = '', compact = false }) {
         }
 
         .sun-icon {
-          color: #E9A24A;
+          color: #A855F7;
           transition: transform 300ms ease;
         }
 
         .moon-icon {
-          color: #F28C18;
+          color: #C084FC;
           transition: transform 300ms ease;
         }
 

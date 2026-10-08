@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from './context/ThemeContext';
+import GlobalGlassBackground from './components/GlobalGlassBackground';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -31,11 +32,8 @@ export default function App() {
 
     // Query all heading, subheading, title, and section-tag elements
     const headingSelectors = [
-      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'h2', 'h3', 'h4', 'h5', 'h6',
       '.section-tag',
-      '.hero-name',
-      '.hero-role',
-      '.hero-company',
       '.spotlight-role',
       '.spotlight-company',
       '.past-exp-heading',
@@ -100,6 +98,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <div className="portfolio-root">
+        {/* 4K Glassmorphic Background Layer */}
+        <GlobalGlassBackground />
+
         {/* Navigation */}
         <Navbar />
 

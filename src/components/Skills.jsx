@@ -252,7 +252,7 @@ export default function Skills() {
 
       <style>{`
         .skills-section {
-          background-color: var(--bg-primary);
+          background-color: transparent;
           border-top: 1px solid var(--border-subtle);
           overflow-x: clip;
           width: 100%;
@@ -378,8 +378,8 @@ export default function Skills() {
             min-height: 105px;
             border-radius: 12px;
             background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border-subtle);
             user-select: none;
             -webkit-user-select: none;
@@ -419,8 +419,8 @@ export default function Skills() {
             min-height: 140px;
             border-radius: 12px;
             background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border-subtle);
             transition: transform 0.3s var(--transition-smooth),
                         border-color 0.3s var(--transition-smooth),

@@ -6,12 +6,25 @@ import { useTheme } from '../context/ThemeContext';
 const PORTFOLIO_URL = 'https://aleenar.in/';
 
 /**
- * Procedurally generates the unified 3D voxel system.
- * The QR code and the dense 3D tree are two mathematical states of the EXACT same 1,312 voxels!
+ * Standard cubic ease-in-out interpolation curve for silky-smooth motion.
  */
-function buildVoxelMatrix(url) {
+function easeInOutCubic(x) {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+}
+
+/**
+ * Procedurally generates the unified 3D voxel system.
+ * The QR code and the dense 3D magic tree are two mathematical states of the EXACT same 1,312 voxels.
+ *
+ * Theme-aware Palette:
+ * - DARK THEME: Deep navy/plum base, rich violet -> royal purple -> radiant lavender -> subtle pink canopy.
+ * - LIGHT THEME: Cream/lavender base, soft lavender -> vivid violet -> blush pink -> lilac canopy.
+ */
+function buildVoxelMatrix(url = PORTFOLIO_URL, isDark = true) {
+  const targetUrl = url || PORTFOLIO_URL;
+
   // 1. Generate standard QR matrix (Version 2, 25x25)
-  const qr = QRCode.create(url, { errorCorrectionLevel: 'M' });
+  const qr = QRCode.create(targetUrl, { errorCorrectionLevel: 'M' });
   const size = qr.modules.size; // 25
   const darkModules = [];
 
@@ -42,8 +55,10 @@ function buildVoxelMatrix(url) {
   const QR_SIDE = 2.36;
   const MOD_SIZE = QR_SIDE / size; // ~0.0944
   const SUB_SIZE = MOD_SIZE / 2;  // ~0.0472
-  const qrNavy = new THREE.Color(0x061426);     // Midnight corporate navy (high contrast)
-  const qrEmerald = new THREE.Color(0x0a2215);  // Deep forest emerald for finder corners
+
+  // Midnight plum for high optical contrast against ivory stone backing (100% camera scan reliability)
+  const qrPlum = new THREE.Color(0x0e0618);
+  const qrCorner = new THREE.Color(0x220c38);
 
   const qrVoxels = [];
   darkModules.forEach((m) => {
@@ -60,7 +75,7 @@ function buildVoxelMatrix(url) {
           sx: SUB_SIZE * 0.98,
           sy: SUB_SIZE * 0.98,
           sz: 0.032,
-          color: m.isBorder ? qrEmerald.clone() : qrNavy.clone(),
+          color: m.isBorder ? qrCorner.clone() : qrPlum.clone(),
           origR: m.r,
           origC: m.c
         });
@@ -73,8 +88,14 @@ function buildVoxelMatrix(url) {
   // - Roots: 100 voxels
   // - Trunk: 140 voxels
   // - Branches: 180 voxels
-  // - Dense Golden Canopy: 892 voxels
+  // - Volumetric Purple/Lavender Canopy: 892 voxels
   const treeVoxels = [];
+
+  // Theme-specific wood and bark colors
+  const rootColor = isDark ? new THREE.Color(0x351930) : new THREE.Color(0x523645);
+  const trunkBaseColor = isDark ? new THREE.Color(0x3b1d38) : new THREE.Color(0x5c3d4e);
+  const trunkBandColor = isDark ? new THREE.Color(0x240f21) : new THREE.Color(0x442a38);
+  const branchColor = isDark ? new THREE.Color(0x4a2444) : new THREE.Color(0x6a475a);
 
   // 1. ROOTS (100 voxels): 8 sprawling root flares anchoring into patio
   const rootAngles = [0, Math.PI / 4, Math.PI / 2, 3 * Math.PI / 4, Math.PI, 5 * Math.PI / 4, 3 * Math.PI / 2, 7 * Math.PI / 4];
@@ -91,12 +112,12 @@ function buildVoxelMatrix(url) {
       type: 'root',
       x: rx, y: ry, z: rz,
       sx: s, sy: s, sz: s,
-      color: new THREE.Color(0x4a2a14),
+      color: rootColor.clone(),
       rotX: 0, rotY: angle, rotZ: 0
     });
   }
 
-  // 2. TRUNK (140 voxels): Sturdy segmented trunk columns with horizontal bark bands
+  // 2. TRUNK (140 voxels): Sturdy segmented trunk columns with subtle purple reflections
   for (let i = 0; i < 140; i++) {
     const yNorm = i / 140;
     const y = 0.18 + yNorm * 1.15; // Y: 0.18 to 1.33
@@ -111,7 +132,7 @@ function buildVoxelMatrix(url) {
       type: 'trunk',
       x: tx, y, z: tz,
       sx: s, sy: s, sz: s,
-      color: isBand ? new THREE.Color(0x2d1609) : new THREE.Color(0x5a361c),
+      color: isBand ? trunkBandColor.clone() : trunkBaseColor.clone(),
       rotX: 0, rotY: 0, rotZ: 0
     });
   }
@@ -136,14 +157,13 @@ function buildVoxelMatrix(url) {
         type: 'branch',
         x: bx, y: by, z: bz,
         sx: s, sy: s, sz: s,
-        color: new THREE.Color(0x523018),
+        color: branchColor.clone(),
         rotX: 0, rotY: 0, rotZ: 0
       });
     }
   });
 
-  // 4. DENSE GOLDEN CANOPY (892 voxels): Rich multi-tier volumetric foliage clusters
-  // Stepped cluster centers producing an organic, dense, billowing cloud of voxel masses
+  // 4. VOLUMETRIC PURPLE / LAVENDER CANOPY (892 voxels)
   const clusterCenters = [
     // Lower tier canopy lobes (flanking branches)
     { x: 0.75, y: 1.85, z: 0.40, r: 0.52 },
@@ -164,18 +184,28 @@ function buildVoxelMatrix(url) {
     { x: 0.0, y: 3.25, z: 0.0, r: 0.42 }
   ];
 
-  // Authentic Ginkgo Golden Palette:
-  // - Bright Gold: #FFCD1E
-  // - Warm Amber Gold: #F5B400
-  // - Yellow-Green Fresh Foliage: #A2C816
-  // - Olive-Yellow Depth: #7A7010
-  // - Sunlit Highlight: #FFE54C
-  const foliagePalette = {
-    brightGold: new THREE.Color(0xffcd1e),
-    amberGold: new THREE.Color(0xf5b400),
-    yellowGreen: new THREE.Color(0xa2c816),
-    oliveYellow: new THREE.Color(0x7a7010),
-    sunHighlight: new THREE.Color(0xffe54c)
+  // Dark Theme Palette: Lavender -> Purple -> Violet with subtle Pink highlights
+  const darkCanopy = {
+    deepViolet: new THREE.Color(0x7c3aed),      // #7C3AED
+    royalPurple: new THREE.Color(0x9333ea),     // #9333EA
+    radiantLavender: new THREE.Color(0xc084fc), // #C084FC
+    softLavender: new THREE.Color(0xd8b4fe),    // #D8B4FE
+    subtlePink: new THREE.Color(0xf472b6),      // #F472B6
+    blushPink: new THREE.Color(0xec4899),       // #EC4899
+    apexGlow: new THREE.Color(0xe9d5ff),        // #E9D5FF
+    shadowPlum: new THREE.Color(0x581c87)       // #581C87
+  };
+
+  // Light Theme Palette: Soft lavender, violet, pink, and muted purple foliage
+  const lightCanopy = {
+    softLavender: new THREE.Color(0xc084fc),    // #C084FC
+    pastelLavender: new THREE.Color(0xd8b4fe),  // #D8B4FE
+    vividViolet: new THREE.Color(0xa855f7),     // #A855F7
+    blushPink: new THREE.Color(0xf472b6),       // #F472B6
+    pastelRose: new THREE.Color(0xf9a8d4),      // #F9A8D4
+    mutedPurple: new THREE.Color(0x8b5cf6),     // #8B5CF6
+    crownHighlight: new THREE.Color(0xede9fe),  // #EDE9FE
+    shadowLilac: new THREE.Color(0x6d28d9)      // #6D28D9
   };
 
   for (let i = 0; i < 892; i++) {
@@ -183,26 +213,40 @@ function buildVoxelMatrix(url) {
     const u = rand();
     const theta = rand() * Math.PI * 2;
     const phi = (rand() - 0.5) * Math.PI;
-    // Bias radius inward for higher cluster core density
     const rad = Math.pow(u, 0.45) * c.r;
     const lx = c.x + rad * Math.cos(phi) * Math.cos(theta) + (rand() - 0.5) * 0.06;
     const ly = c.y + rad * Math.sin(phi) * 0.88 + (rand() - 0.5) * 0.06;
     const lz = c.z + rad * Math.cos(phi) * Math.sin(theta) + (rand() - 0.5) * 0.06;
 
     let col;
-    if (ly < 2.05 || rad < 0.22) {
-      col = rand() > 0.4 ? foliagePalette.oliveYellow : foliagePalette.amberGold;
-    } else if (ly > 3.0) {
-      col = rand() > 0.3 ? foliagePalette.sunHighlight : foliagePalette.brightGold;
+    if (isDark) {
+      if (ly < 2.05 || rad < 0.22) {
+        col = rand() > 0.4 ? darkCanopy.shadowPlum : darkCanopy.deepViolet;
+      } else if (ly > 3.0) {
+        col = rand() > 0.35 ? darkCanopy.apexGlow : darkCanopy.softLavender;
+      } else {
+        const p = rand();
+        if (p < 0.28) col = darkCanopy.radiantLavender;
+        else if (p < 0.52) col = darkCanopy.royalPurple;
+        else if (p < 0.72) col = darkCanopy.deepViolet;
+        else if (p < 0.88) col = darkCanopy.subtlePink;
+        else col = darkCanopy.blushPink;
+      }
     } else {
-      const p = rand();
-      if (p < 0.38) col = foliagePalette.brightGold;
-      else if (p < 0.62) col = foliagePalette.amberGold;
-      else if (p < 0.84) col = foliagePalette.yellowGreen;
-      else col = foliagePalette.sunHighlight;
+      if (ly < 2.05 || rad < 0.22) {
+        col = rand() > 0.4 ? lightCanopy.shadowLilac : lightCanopy.mutedPurple;
+      } else if (ly > 3.0) {
+        col = rand() > 0.35 ? lightCanopy.crownHighlight : lightCanopy.pastelLavender;
+      } else {
+        const p = rand();
+        if (p < 0.30) col = lightCanopy.softLavender;
+        else if (p < 0.54) col = lightCanopy.vividViolet;
+        else if (p < 0.74) col = lightCanopy.blushPink;
+        else if (p < 0.88) col = lightCanopy.mutedPurple;
+        else col = lightCanopy.pastelRose;
+      }
     }
 
-    // Slightly increased voxel scale for lush interlocking volume
     const s = 0.102 + rand() * 0.022;
     treeVoxels.push({
       type: 'canopy',
@@ -215,10 +259,10 @@ function buildVoxelMatrix(url) {
     });
   }
 
-  // Sort QR voxels so that lower/central modules form roots/trunk, and upper modules form canopy
+  // Sort QR voxels so lower/central modules form roots/trunk, and upper modules form canopy
   qrVoxels.sort((a, b) => a.y - b.y || a.x - b.x);
 
-  // Precomputed gentle flight curvature for each voxel to ensure organic digital dispersal without overflowing bounds
+  // Precomputed gentle flight curvature for organic 3D dispersal
   let cSeed = 12345;
   function randC() {
     cSeed = (cSeed * 9301 + 49297) % 233280;
@@ -226,30 +270,47 @@ function buildVoxelMatrix(url) {
   }
   const flightCurvatures = new Float32Array(TOTAL_VOXELS * 3);
   for (let i = 0; i < TOTAL_VOXELS; i++) {
-    flightCurvatures[i * 3 + 0] = (randC() - 0.5) * 0.20; // gentle dx
-    flightCurvatures[i * 3 + 1] = (randC() - 0.3) * 0.25; // gentle dy
-    flightCurvatures[i * 3 + 2] = (randC() - 0.5) * 0.20; // gentle dz
+    flightCurvatures[i * 3 + 0] = (randC() - 0.5) * 0.22;
+    flightCurvatures[i * 3 + 1] = (randC() - 0.25) * 0.28;
+    flightCurvatures[i * 3 + 2] = (randC() - 0.5) * 0.22;
+  }
+
+  // Precalculated organic wave stagger offsets for each voxel [0.0 to 0.22]
+  // Produces an organic blossoming effect rather than a simultaneous block jump
+  const staggerOffsets = new Float32Array(TOTAL_VOXELS);
+  for (let i = 0; i < TOTAL_VOXELS; i++) {
+    const tV = treeVoxels[i];
+    if (tV.type === 'root') {
+      staggerOffsets[i] = (i / 100) * 0.04;
+    } else if (tV.type === 'trunk') {
+      staggerOffsets[i] = 0.03 + Math.max(0, Math.min(1, (tV.y - 0.18) / 1.15)) * 0.05;
+    } else if (tV.type === 'branch') {
+      staggerOffsets[i] = 0.07 + Math.max(0, Math.min(1, (tV.y - 1.25) / 1.4)) * 0.06;
+    } else {
+      const distFromCenter = Math.sqrt(tV.x * tV.x + tV.z * tV.z) / 1.2;
+      const heightNorm = Math.max(0, Math.min(1, (tV.y - 1.8) / 1.5));
+      staggerOffsets[i] = 0.10 + Math.min(0.12, heightNorm * 0.06 + distFromCenter * 0.06);
+    }
   }
 
   return {
     totalCount: TOTAL_VOXELS,
     qrVoxels,
     treeVoxels,
-    flightCurvatures
+    flightCurvatures,
+    staggerOffsets
   };
 }
 
 /**
  * Calculates adaptive camera framing and positioning to ensure the complete
- * 3D object (canopy, trunk, roots, square ground patio base, and floating leaves)
- * fits comfortably inside the visible viewport with 18–20% safe padding at all times.
+ * 3D object fits comfortably inside the visible viewport with safe padding.
  */
 function getFramingParameters(width, height) {
   const aspect = width > 0 && height > 0 ? width / height : 1.0;
   const targetY = 1.25;
   const target = new THREE.Vector3(0, targetY, 0);
 
-  // Maintain consistent horizontal/vertical framing across desktop & mobile
   const fov = 34;
   const aspectFactor = Math.min(1.0, aspect);
   const treeDist = 9.9 / aspectFactor;
@@ -279,9 +340,10 @@ function getFramingParameters(width, height) {
   };
 }
 
-export default function MagicTreeQR() {
+export default function MagicTreeQR({ url = PORTFOLIO_URL } = {}) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
+  const targetUrl = url || PORTFOLIO_URL;
 
   // Initial state is strictly 'qr'
   const [activeState, setActiveState] = useState('qr'); // 'qr' | 'tree'
@@ -296,8 +358,8 @@ export default function MagicTreeQR() {
   const { theme } = useTheme();
   const isDark = theme !== 'light';
 
-  // Compute dual-state voxel coordinate tables once
-  const voxelData = useMemo(() => buildVoxelMatrix(PORTFOLIO_URL), []);
+  // Compute dual-state voxel coordinate tables when URL or theme changes
+  const voxelData = useMemo(() => buildVoxelMatrix(targetUrl, isDark), [targetUrl, isDark]);
 
   const lastToggleTimeRef = useRef(0);
   const transitionTriggerRef = useRef(null);
@@ -314,7 +376,6 @@ export default function MagicTreeQR() {
     setIsTransitioning(true);
 
     if (nextState === 'tree') {
-      // Hide button immediately when entering tree state
       setActiveState('tree');
     }
 
@@ -339,6 +400,12 @@ export default function MagicTreeQR() {
 
     let animFrameId;
     let isDisposed = false;
+    let isIntersecting = true;
+    let isTabVisible = !document.hidden;
+
+    // Detect user accessibility reduced motion preference
+    const prefersReducedMotion = typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // --- 1. Scene & High-Precision Renderer ---
     const scene = new THREE.Scene();
@@ -346,7 +413,6 @@ export default function MagicTreeQR() {
     const width = container.clientWidth || 240;
     const height = container.clientHeight || 240;
 
-    // Dynamic adaptive camera framing based on bounding box
     let framing = getFramingParameters(width, height);
 
     const camera = new THREE.PerspectiveCamera(framing.fov, framing.aspect, 0.1, 50);
@@ -361,22 +427,34 @@ export default function MagicTreeQR() {
       powerPreference: 'high-performance'
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2.0));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-    // --- 2. Clean Natural Lighting ---
-    const ambientLight = new THREE.AmbientLight(0xfffcf2, isDark ? 1.15 : 1.35);
+    // --- 2. Clean Natural Lighting with Lavender/Purple Ambiance ---
+    const ambientLight = new THREE.AmbientLight(
+      isDark ? 0xede9fe : 0xffffff,
+      isDark ? 1.25 : 1.40
+    );
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfff3d6, 1.75);
+    const sunLight = new THREE.DirectionalLight(
+      isDark ? 0xf5d0fe : 0xfff8ee,
+      isDark ? 1.85 : 1.70
+    );
     sunLight.position.set(5.2, 8.8, 4.4);
     scene.add(sunLight);
 
-    const skyFill = new THREE.DirectionalLight(0xdbe9f6, 0.5);
+    const skyFill = new THREE.DirectionalLight(
+      isDark ? 0xc084fc : 0xe9d5ff,
+      isDark ? 0.65 : 0.55
+    );
     skyFill.position.set(-4.5, 3.5, -4.5);
     scene.add(skyFill);
 
-    const groundBounce = new THREE.DirectionalLight(0x756040, 0.3);
+    const groundBounce = new THREE.DirectionalLight(
+      isDark ? 0x3b1d38 : 0xd8b4fe,
+      0.35
+    );
     groundBounce.position.set(0, -2.5, 0);
     scene.add(groundBounce);
 
@@ -410,10 +488,10 @@ export default function MagicTreeQR() {
     platformGroup.position.y = 0;
     sceneMaster.add(platformGroup);
 
-    // A. Clean Slate Stone Slab Base (vertical cut sides)
+    // A. Base Slab Base (Dark: dark navy/plum; Light: soft cream/lavender)
     const slabGeo = new THREE.BoxGeometry(3.3, 0.22, 3.3);
     const slabMat = new THREE.MeshStandardMaterial({
-      color: isDark ? 0x242830 : 0x484d58,
+      color: isDark ? 0x180e26 : 0xeae2f0,
       roughness: 0.85,
       flatShading: true
     });
@@ -433,15 +511,15 @@ export default function MagicTreeQR() {
     const paverDummy = new THREE.Object3D();
 
     const paverColors = isDark ? [
-      new THREE.Color(0xb2aca1),
-      new THREE.Color(0x958f84),
-      new THREE.Color(0xc4bfb5),
-      new THREE.Color(0x827d73)
+      new THREE.Color(0x2c1a42),
+      new THREE.Color(0x351f50),
+      new THREE.Color(0x3d245c),
+      new THREE.Color(0x251638)
     ] : [
-      new THREE.Color(0xebe6de),
-      new THREE.Color(0xded8ce),
-      new THREE.Color(0xf6f2eb),
-      new THREE.Color(0xd0cac0)
+      new THREE.Color(0xfaf5fd),
+      new THREE.Color(0xf4ebf7),
+      new THREE.Color(0xede0f2),
+      new THREE.Color(0xf7f0fa)
     ];
 
     let pIdx = 0;
@@ -466,10 +544,10 @@ export default function MagicTreeQR() {
     if (paversMesh.instanceColor) paversMesh.instanceColor.needsUpdate = true;
     platformGroup.add(paversMesh);
 
-    // C. Grass Fringe along all 4 outer edges
+    // C. Grass / Violet Sprouts along all 4 outer edges
     const tuftGeo = new THREE.ConeGeometry(0.045, 0.16, 4);
     const tuftMat = new THREE.MeshStandardMaterial({
-      color: isDark ? 0x48793b : 0x5b934c,
+      color: isDark ? 0x8b5cf6 : 0xa855f7,
       roughness: 0.8,
       flatShading: true
     });
@@ -495,45 +573,54 @@ export default function MagicTreeQR() {
     grassTufts.instanceMatrix.needsUpdate = true;
     platformGroup.add(grassTufts);
 
-    // D. Scattered Golden Leaf Flakes on the patio
-    const fallenLeafGeo = new THREE.PlaneGeometry(0.09, 0.07);
-    const fallenLeafMat = new THREE.MeshStandardMaterial({
-      color: 0xf5b814,
-      roughness: 0.75,
-      side: THREE.DoubleSide
-    });
+    // D. Scattered Lavender & Pink Petals on the patio
+    const fallenPetalColors = isDark
+      ? [0xc084fc, 0xf472b6, 0xd8b4fe, 0xec4899]
+      : [0xd8b4fe, 0xf472b6, 0xc084fc, 0xf9a8d4];
+
     const fallenCoords = [
-      { x: 0.35, z: 0.42, rot: 0.5 },
-      { x: -0.45, z: 0.38, rot: 1.4 },
-      { x: 0.55, z: -0.35, rot: 2.1 },
-      { x: -0.32, z: -0.55, rot: 0.9 },
-      { x: 0.22, z: 0.75, rot: 2.8 },
-      { x: -0.65, z: -0.15, rot: 1.7 },
-      { x: 0.65, z: 0.25, rot: 0.3 },
-      { x: -0.22, z: 0.65, rot: 3.1 },
-      { x: 0.48, z: -0.72, rot: 1.2 },
-      { x: -0.62, z: 0.68, rot: 2.5 }
+      { x: 0.35, z: 0.42, rot: 0.5, c: fallenPetalColors[0] },
+      { x: -0.45, z: 0.38, rot: 1.4, c: fallenPetalColors[1] },
+      { x: 0.55, z: -0.35, rot: 2.1, c: fallenPetalColors[2] },
+      { x: -0.32, z: -0.55, rot: 0.9, c: fallenPetalColors[0] },
+      { x: 0.22, z: 0.75, rot: 2.8, c: fallenPetalColors[3] },
+      { x: -0.65, z: -0.15, rot: 1.7, c: fallenPetalColors[1] },
+      { x: 0.65, z: 0.25, rot: 0.3, c: fallenPetalColors[2] },
+      { x: -0.22, z: 0.65, rot: 3.1, c: fallenPetalColors[0] },
+      { x: 0.48, z: -0.72, rot: 1.2, c: fallenPetalColors[1] },
+      { x: -0.62, z: 0.68, rot: 2.5, c: fallenPetalColors[3] }
     ];
-    fallenCoords.forEach(({ x, z, rot }) => {
-      const fl = new THREE.Mesh(fallenLeafGeo, fallenLeafMat);
+
+    const fallenLeafGeo = new THREE.PlaneGeometry(0.09, 0.07);
+    fallenCoords.forEach(({ x, z, rot, c }) => {
+      const flMat = new THREE.MeshStandardMaterial({
+        color: c,
+        roughness: 0.75,
+        side: THREE.DoubleSide
+      });
+      const fl = new THREE.Mesh(fallenLeafGeo, flMat);
       fl.position.set(x, 0.045, z);
       fl.rotation.set(-Math.PI / 2, 0, rot);
       platformGroup.add(fl);
     });
 
-    // --- 6. Drifting Falling Golden Leaves in 3D (Strictly hidden in QR mode!) ---
+    // --- 6. Drifting Falling Petals in 3D (Lavender & Blossom Pink) ---
+    const fallingColors = isDark
+      ? [0xc084fc, 0xf472b6, 0xe9d5ff, 0xd8b4fe]
+      : [0xc084fc, 0xf472b6, 0xd8b4fe, 0xf9a8d4];
+
     const fallingLeafGeo = new THREE.PlaneGeometry(0.08, 0.06);
-    const fallingLeafMat = new THREE.MeshStandardMaterial({
-      color: 0xffd026,
-      roughness: 0.72,
-      side: THREE.DoubleSide
-    });
     const FALLING_COUNT = 12;
     const fallingLeaves = [];
     const isTreeInit = activeStateRef.current === 'tree';
 
     for (let i = 0; i < FALLING_COUNT; i++) {
-      const fl = new THREE.Mesh(fallingLeafGeo, fallingLeafMat);
+      const flMat = new THREE.MeshStandardMaterial({
+        color: fallingColors[i % fallingColors.length],
+        roughness: 0.72,
+        side: THREE.DoubleSide
+      });
+      const fl = new THREE.Mesh(fallingLeafGeo, flMat);
       fl.position.set(
         (Math.random() - 0.5) * 2.2,
         0.2 + Math.random() * 3.2,
@@ -549,16 +636,18 @@ export default function MagicTreeQR() {
       fallingLeaves.push(fl);
     }
 
-    // --- 7. THE MASTER VOXEL SYSTEM: 1,312 INSTANCED CUBES ---
+    // --- 7. MASTER VOXEL SYSTEM: 1,312 INSTANCED CUBES ---
     const voxelGeo = new THREE.BoxGeometry(1, 1, 1);
     const voxelMat = new THREE.MeshStandardMaterial({
-      roughness: 0.72,
-      metalness: 0.04,
+      roughness: 0.68,
+      metalness: 0.06,
       flatShading: true
     });
 
     const TOTAL_COUNT = voxelData.totalCount; // 1,312
     const voxelsMesh = new THREE.InstancedMesh(voxelGeo, voxelMat, TOTAL_COUNT);
+
+    // Pre-allocated object pool to prevent garbage collection spikes in animate()
     const dummy = new THREE.Object3D();
     const tempColor = new THREE.Color();
 
@@ -588,19 +677,19 @@ export default function MagicTreeQR() {
     if (voxelsMesh.instanceColor) voxelsMesh.instanceColor.needsUpdate = true;
     treeSwayGroup.add(voxelsMesh);
 
-    // --- 8. Smooth Bidirectional Transition Engine (850ms) ---
+    // --- 8. Delta-Time Continuous Transition Engine ---
     let transition = {
       active: false,
       direction: null, // 'to-tree' | 'to-qr'
-      startTime: 0,
-      duration: 850,
+      elapsed: 0,
+      duration: prefersReducedMotion ? 160 : 1350, // 1.35s duration for silky interpolation
       onComplete: null
     };
 
     const triggerTransition = (targetState, callback) => {
       transition.active = true;
       transition.direction = targetState === 'tree' ? 'to-tree' : 'to-qr';
-      transition.startTime = performance.now();
+      transition.elapsed = 0;
       transition.onComplete = callback;
 
       if (targetState === 'tree') {
@@ -610,7 +699,7 @@ export default function MagicTreeQR() {
 
     transitionTriggerRef.current = triggerTransition;
 
-    // --- 9. Interactive Parallax, 3D Raycasting & Direct Tree Tapping ---
+    // --- 9. Interactive Parallax & Direct Tree Tapping ---
     const raycaster = new THREE.Raycaster();
     const mouseNDC = new THREE.Vector2();
 
@@ -656,7 +745,6 @@ export default function MagicTreeQR() {
         pointerStartX = clientX;
         pointerStartY = clientY;
       } else if (activeStateRef.current === 'tree') {
-        // Subtle hover parallax in tree state
         targetRotY = normX * 0.22;
         targetRotX = normY * 0.1;
       }
@@ -670,7 +758,6 @@ export default function MagicTreeQR() {
       const clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY) || pointerStartY;
       const elapsed = performance.now() - pointerStartTime;
 
-      // Detect tap vs drag (small movement < 8px and tap duration < 500ms)
       if (!didDrag && totalMoveDist < 8 && elapsed < 500) {
         const rect = container.getBoundingClientRect();
         if (
@@ -683,7 +770,6 @@ export default function MagicTreeQR() {
             mouseNDC.x = ((clientX - rect.left) / rect.width) * 2 - 1;
             mouseNDC.y = -(((clientY - rect.top) / rect.height) * 2 - 1);
             raycaster.setFromCamera(mouseNDC, camera);
-            // Clicked directly on tree or within stage framing the tree
             handleToggle();
           } else {
             handleToggle();
@@ -703,7 +789,18 @@ export default function MagicTreeQR() {
     window.addEventListener('pointerup', handlePointerUp);
     container.addEventListener('pointerleave', handlePointerLeave);
 
-    // --- 10. Resize Observer ---
+    // --- 10. Resource Saving: Visibility & Intersection Observers ---
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      isIntersecting = entry.isIntersecting;
+    }, { threshold: 0.02 });
+    intersectionObserver.observe(container);
+
+    const handleVisibilityChange = () => {
+      isTabVisible = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Resize Observer
     const resizeObserver = new ResizeObserver(entries => {
       if (!entries || !entries[0] || isDisposed) return;
       const { width: newW, height: newH } = entries[0].contentRect;
@@ -723,68 +820,58 @@ export default function MagicTreeQR() {
     });
     resizeObserver.observe(container);
 
-    // --- 11. Render & Simulation Loop ---
-    let clock = new THREE.Clock();
+    // --- 11. Render & Delta-Time Simulation Loop ---
+    const clock = new THREE.Clock();
 
     const animate = () => {
       if (isDisposed) return;
       animFrameId = requestAnimationFrame(animate);
 
-      const delta = clock.getDelta();
+      // Skip render when off-screen or tab is hidden and not actively transitioning
+      if ((!isIntersecting || !isTabVisible) && !transition.active) {
+        return;
+      }
+
+      const delta = Math.min(clock.getDelta(), 0.05); // Cap delta to prevent jump on tab resume
       const elapsedTime = clock.getElapsedTime();
 
-      // Handle active transition interpolation
+      // Handle continuous delta-time based transition interpolation
       if (transition.active) {
-        const elapsed = performance.now() - transition.startTime;
-        const rawProgress = Math.min(1.0, elapsed / transition.duration);
-
-        // Smooth cubic easing
-        const ease = rawProgress < 0.5
-          ? 4 * rawProgress * rawProgress * rawProgress
-          : 1 - Math.pow(-2 * rawProgress + 2, 3) / 2;
+        transition.elapsed += delta * 1000;
+        const rawProgress = Math.min(1.0, transition.elapsed / transition.duration);
+        const globalEase = easeInOutCubic(rawProgress);
 
         const isToTree = transition.direction === 'to-tree';
-        const t = isToTree ? ease : 1.0 - ease;
 
-        // A. Continuous Spherical Camera Orbit (Monotonic distance expansion, zero zoom-in)
-        const az = framing.azTree * t;
-        const el = framing.elTree * t;
-        const dist = framing.qrDist + (framing.treeDist - framing.qrDist) * t;
-        camera.position.set(
-          dist * Math.sin(az) * Math.cos(el),
-          framing.targetY + dist * Math.sin(el),
-          dist * Math.cos(az) * Math.cos(el)
-        );
-        camera.lookAt(framing.target);
-
-        // B. Ground Platform & Backing Plate Interpolation
-        platformGroup.scale.setScalar(Math.max(0.0001, t));
-        platformGroup.visible = t > 0.01;
-
-        const plateScale = Math.max(0.0001, 1 - t);
-        qrPlateMesh.scale.setScalar(plateScale);
-        qrPlateMesh.visible = (1 - t) > 0.01;
-
-        // C. Interpolate all 1,312 Voxels along 3D Arcs
-        const arc = Math.sin(t * Math.PI);
-        const { flightCurvatures } = voxelData;
+        // Staggered per-voxel organic wave interpolation
+        const { flightCurvatures, staggerOffsets } = voxelData;
+        const maxStagger = 0.22;
 
         for (let i = 0; i < TOTAL_COUNT; i++) {
           const q = voxelData.qrVoxels[i];
           const tr = voxelData.treeVoxels[i];
+          const delay = staggerOffsets[i];
 
+          // Remap global progress to localized per-voxel progress [0, 1]
+          const localProgress = Math.max(0, Math.min(1.0, (rawProgress - delay) / (1.0 - maxStagger)));
+          const localEase = easeInOutCubic(localProgress);
+          const t = isToTree ? localEase : (1.0 - localEase);
+
+          // Smooth 3D flight arcs
+          const arc = Math.sin(t * Math.PI);
           const px = q.x + (tr.x - q.x) * t + arc * flightCurvatures[i * 3 + 0];
           const py = q.y + (tr.y - q.y) * t + arc * flightCurvatures[i * 3 + 1];
           const pz = q.z + (tr.z - q.z) * t + arc * flightCurvatures[i * 3 + 2];
 
-          // Scale transition
-          const sx = q.sx + (tr.sx - q.sx) * t;
-          const sy = q.sy + (tr.sy - q.sy) * t;
-          const sz = q.sz + (tr.sz - q.sz) * t;
+          // Scale interpolation with gentle mid-flight blossom expansion
+          const pulse = 1.0 + 0.05 * arc;
+          const sx = (q.sx + (tr.sx - q.sx) * t) * pulse;
+          const sy = (q.sy + (tr.sy - q.sy) * t) * pulse;
+          const sz = (q.sz + (tr.sz - q.sz) * t) * pulse;
 
-          // Rotation tumble during flight
-          const rx = tr.rotX * t + Math.sin(t * Math.PI) * 0.15;
-          const ry = tr.rotY * t + Math.sin(t * Math.PI) * 0.25;
+          // Rotation tumble during dispersal
+          const rx = tr.rotX * t + arc * 0.12;
+          const ry = tr.rotY * t + arc * 0.20;
           const rz = tr.rotZ * t;
 
           dummy.position.set(px, py, pz);
@@ -800,6 +887,26 @@ export default function MagicTreeQR() {
 
         voxelsMesh.instanceMatrix.needsUpdate = true;
         if (voxelsMesh.instanceColor) voxelsMesh.instanceColor.needsUpdate = true;
+
+        // Continuous Spherical Camera Orbit (Monotonic distance expansion, zero zoom-in)
+        const camT = isToTree ? globalEase : (1.0 - globalEase);
+        const az = framing.azTree * camT;
+        const el = framing.elTree * camT;
+        const dist = framing.qrDist + (framing.treeDist - framing.qrDist) * camT;
+        camera.position.set(
+          dist * Math.sin(az) * Math.cos(el),
+          framing.targetY + dist * Math.sin(el),
+          dist * Math.cos(az) * Math.cos(el)
+        );
+        camera.lookAt(framing.target);
+
+        // Ground Platform & Backing Plate Interpolation
+        platformGroup.scale.setScalar(Math.max(0.0001, camT));
+        platformGroup.visible = camT > 0.01;
+
+        const plateScale = Math.max(0.0001, 1.0 - camT);
+        qrPlateMesh.scale.setScalar(plateScale);
+        qrPlateMesh.visible = (1.0 - camT) > 0.01;
 
         if (rawProgress >= 1.0) {
           transition.active = false;
@@ -817,37 +924,39 @@ export default function MagicTreeQR() {
         camera.lookAt(framing.target);
       }
 
-      // Live tree living simulation (sway, drifting leaves, parallax)
+      // Live tree living simulation (sway, drifting petals, parallax)
       const isTreeCurrent = activeStateRef.current === 'tree';
       if (isTreeCurrent || transition.active) {
-        // Natural foliage breeze sway
-        treeSwayGroup.rotation.z = Math.sin(elapsedTime * 1.25) * 0.015;
-        treeSwayGroup.rotation.x = Math.sin(elapsedTime * 0.9) * 0.012;
+        if (!prefersReducedMotion) {
+          // Natural foliage breeze sway
+          treeSwayGroup.rotation.z = Math.sin(elapsedTime * 1.15) * 0.014;
+          treeSwayGroup.rotation.x = Math.sin(elapsedTime * 0.85) * 0.010;
 
-        // Falling golden leaves
-        fallingLeaves.forEach(leaf => {
-          if (!leaf.visible) return;
-          const ud = leaf.userData;
-          leaf.position.y -= ud.vy;
-          leaf.position.x += Math.sin(elapsedTime * 1.5 + ud.phase) * 0.003;
-          leaf.position.z += Math.cos(elapsedTime * 1.5 + ud.phase) * 0.003;
-          leaf.rotation.x += ud.vRot;
-          leaf.rotation.y += ud.vRot * 0.8;
+          // Falling lavender & pink petals
+          fallingLeaves.forEach(leaf => {
+            if (!leaf.visible) return;
+            const ud = leaf.userData;
+            leaf.position.y -= ud.vy * (delta * 60);
+            leaf.position.x += Math.sin(elapsedTime * 1.4 + ud.phase) * 0.003;
+            leaf.position.z += Math.cos(elapsedTime * 1.4 + ud.phase) * 0.003;
+            leaf.rotation.x += ud.vRot * (delta * 60);
+            leaf.rotation.y += ud.vRot * 0.8 * (delta * 60);
 
-          if (leaf.position.y < 0.04) {
-            leaf.position.y = 3.3 + Math.random() * 0.4;
-            leaf.position.x = (Math.random() - 0.5) * 2.0;
-            leaf.position.z = (Math.random() - 0.5) * 2.0;
-          }
-        });
+            if (leaf.position.y < 0.04) {
+              leaf.position.y = 3.3 + Math.random() * 0.4;
+              leaf.position.x = (Math.random() - 0.5) * 2.0;
+              leaf.position.z = (Math.random() - 0.5) * 2.0;
+            }
+          });
+        }
 
-        // Parallax damping
-        currentRotY += (targetRotY - currentRotY) * 0.08;
-        currentRotX += (targetRotX - currentRotX) * 0.08;
+        // Smooth parallax damping
+        currentRotY += (targetRotY - currentRotY) * (delta * 6.0);
+        currentRotX += (targetRotX - currentRotX) * (delta * 6.0);
         sceneMaster.rotation.y = currentRotY;
         sceneMaster.rotation.x = currentRotX;
       } else {
-        // Keep dead steady in QR mode for 100% optical scannability
+        // Steady in QR mode for instantaneous optical scanning
         treeSwayGroup.rotation.set(0, 0, 0);
         sceneMaster.rotation.set(0, 0, 0);
       }
@@ -857,7 +966,7 @@ export default function MagicTreeQR() {
 
     animate();
 
-    // --- 12. Cleanup & Deep Disposal ---
+    // --- 12. Cleanup & Disposal ---
     return () => {
       isDisposed = true;
       cancelAnimationFrame(animFrameId);
@@ -866,6 +975,8 @@ export default function MagicTreeQR() {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
       container.removeEventListener('pointerleave', handlePointerLeave);
+      intersectionObserver.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       resizeObserver.disconnect();
 
       scene.traverse(obj => {
@@ -898,11 +1009,11 @@ export default function MagicTreeQR() {
             handleToggle();
           }
         }}
-        title={activeState === 'qr' ? 'Interactive 3D QR Code' : 'Interactive 3D Magic Tree'}
+        title={activeState === 'qr' ? 'Click to bloom Magic Tree' : 'Click to assemble QR Code'}
         aria-label={
           activeState === 'qr'
-            ? '3D Voxel QR Code for https://aleenar.in/'
-            : '3D Golden Voxel Magic Tree'
+            ? '3D Voxel QR Code for https://aleenar.in/ — Click to bloom Magic Tree'
+            : '3D Lavender Voxel Magic Tree — Click to assemble QR Code'
         }
       >
         <div className="tree-animation-layer">
