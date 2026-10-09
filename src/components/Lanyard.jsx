@@ -1046,18 +1046,15 @@ export default function Lanyard({ className = '' }) {
     let lastClientY = 0;
     let lastClientTime = performance.now();
 
-    // 3D Flip State (Double-Tap: Front <-> Back)
+    // 3D Flip State (Single-Tap / Click: Front <-> Back)
     let isFlippedToBack = false;
     let lastFlipTime = 0;
 
-    // Double-tap vs Drag Gesture Tracking
+    // Single-tap vs Drag Gesture Tracking
     let touchStartX = 0;
     let touchStartY = 0;
     let touchStartTime = 0;
     let hasExceededDragTolerance = false;
-    let lastTapTime = 0;
-    let lastTapX = 0;
-    let lastTapY = 0;
 
     // 3D Position State
     let currentSwingX = baseRestX;
@@ -1184,11 +1181,10 @@ export default function Lanyard({ className = '' }) {
       const now = performance.now();
       const dt = Math.max((now - lastClientTime) / 1000, 0.001);
 
-      // Detect if user movement exceeds tap tolerance (12px)
+      // Detect if user movement exceeds tap tolerance (14px)
       const distFromStart = Math.hypot(clientX - touchStartX, clientY - touchStartY);
-      if (distFromStart > 12) {
+      if (distFromStart > 14) {
         hasExceededDragTolerance = true;
-        lastTapTime = 0; // A drag completely invalidates any prior tap
       }
 
       updateRaycasterMouse(clientX, clientY);
@@ -1248,7 +1244,7 @@ export default function Lanyard({ className = '' }) {
       const pressDuration = now - touchStartTime;
       const distFromStart = Math.hypot(clientX - touchStartX, clientY - touchStartY);
 
-      const wasTap = !hasExceededDragTolerance && distFromStart <= 14 && pressDuration < 320;
+      const wasTap = !hasExceededDragTolerance && distFromStart <= 16 && pressDuration < 380;
 
       isPointerDown = false;
       isBadgeDragging = false;
@@ -1262,27 +1258,8 @@ export default function Lanyard({ className = '' }) {
       } catch (_) {}
 
       if (wasTap) {
-        const timeSinceLastTap = now - lastTapTime;
-        const distFromLastTap = Math.hypot(clientX - lastTapX, clientY - lastTapY);
-
-        // Double-Tap detection:
-        // 1. Two taps within interval (~40ms to ~340ms)
-        // 2. Spatial tolerance between taps (<= 32px)
-        if (timeSinceLastTap >= 40 && timeSinceLastTap <= 340 && distFromLastTap <= 32) {
-          // GESTURE 3: DOUBLE TAP -> Flip 180°!
-          triggerFlip();
-          lastTapTime = 0; // Reset so 3rd tap won't re-flip
-          lastTapX = 0;
-          lastTapY = 0;
-        } else {
-          // GESTURE 2: SINGLE TAP -> Do nothing!
-          lastTapTime = now;
-          lastTapX = clientX;
-          lastTapY = clientY;
-        }
-      } else {
-        // GESTURE 1: DRAG -> Never flips!
-        lastTapTime = 0;
+        // GESTURE: SINGLE TAP / CLICK -> Flip 180°!
+        triggerFlip();
       }
     }
 
@@ -1334,14 +1311,6 @@ export default function Lanyard({ className = '' }) {
       endDrag(clientX, clientY, e);
     }
 
-    function onDblClick(e) {
-      e.preventDefault();
-      const { clientX, clientY } = getPointerClientCoords(e);
-      if (checkHit(clientX, clientY)) {
-        triggerFlip();
-      }
-    }
-
     canvas.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
@@ -1351,7 +1320,6 @@ export default function Lanyard({ className = '' }) {
     window.addEventListener('touchmove', onTouchMove, { passive: false });
     window.addEventListener('touchend', onTouchEnd);
     window.addEventListener('touchcancel', onTouchEnd);
-    canvas.addEventListener('dblclick', onDblClick);
 
     // 8B. Device Orientation Sensor Integration
     let isListenerAttached = false;
@@ -1565,7 +1533,6 @@ export default function Lanyard({ className = '' }) {
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('touchcancel', onTouchEnd);
-      canvas.removeEventListener('dblclick', onDblClick);
       if (isListenerAttached) {
         window.removeEventListener('deviceorientation', handleOrientation);
       }
